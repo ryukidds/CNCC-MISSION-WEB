@@ -1,173 +1,100 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
-import { Search, X, Globe2 } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Header: React.FC = () => {
-  const { language, setLanguage, d, t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMinistriesDropdownOpen, setIsMinistriesDropdownOpen] = useState(false);
-
-  // Scroll detection to handle sticky header transition
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Close menus when route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setIsSearchOpen(false);
-    setIsMinistriesDropdownOpen(false);
+    const timeoutId = window.setTimeout(() => {
+      setIsMobileMenuOpen(false);
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [pathname]);
 
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const navLinks = [
-    { href: '/about', label: t('선교회 소개', 'About CNCC') },
-    { href: '/projects', label: t('블로그 & 소식', 'Blog & News') },
-    { href: '/global', label: t('해외 지부', 'Global Branches') },
+    { href: '/about', label: t('소개', 'About') },
+    { href: '/about#pillars', label: t('사역', 'Ministries') },
+    { href: '/global', label: t('해외지부', 'Global') },
+    { href: '/projects', label: t('소식', 'News') },
     { href: '/support', label: t('후원 안내', 'Support & Giving') },
   ];
 
-  const isHome = pathname === '/';
-  const transparentMode = isHome && !isScrolled;
-
   return (
     <>
-      <header className={`header-container ${transparentMode ? 'transparent-mode' : 'solid-mode'}`}>
+      <header className={`header-container ${isScrolled || isMobileMenuOpen ? 'solid-mode' : ''}`}>
         {/* Main Navbar */}
         <div className="main-navbar">
           <div className="container nav-content">
             {/* Left Group */}
             <div className="nav-group-left">
               <Link href="/" className="logo-link">
-                <img src="/logo.svg" alt="CNCC Logo" className="logo-img" style={{ height: '48px', width: 'auto' }} />
+                <Image src="/logo.svg" alt="CNCC Logo" className="logo-img" width={154} height={48} priority />
               </Link>
-              
+            </div>
+
+            <nav className="desktop-nav-links" aria-label={t('주요 메뉴', 'Primary navigation')}>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={pathname === link.href.split('#')[0] ? 'active' : ''}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Right Group */}
+            <div className="nav-group-right">
+              <div className="language-switch" aria-label={t('언어 선택', 'Language selector')}>
+                <button
+                  type="button"
+                  onClick={() => setLanguage('ko')}
+                  className={language === 'ko' ? 'active' : ''}
+                  aria-pressed={language === 'ko'}
+                >
+                  KO
+                </button>
+                <span aria-hidden="true">|</span>
+                <button
+                  type="button"
+                  onClick={() => setLanguage('en')}
+                  className={language === 'en' ? 'active' : ''}
+                  aria-pressed={language === 'en'}
+                >
+                  EN
+                </button>
+              </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="nav-item-btn menu-toggle-btn"
                 aria-label="Open Menu"
+                aria-expanded={isMobileMenuOpen}
               >
-                <span>Menu</span>
-                <span className="hamburger-icon">☰</span>
-              </button>
-
-              <div 
-                className="nav-dropdown-wrapper"
-                onMouseEnter={() => setIsMinistriesDropdownOpen(true)}
-                onMouseLeave={() => setIsMinistriesDropdownOpen(false)}
-              >
-                <button 
-                  className="nav-item-btn dropdown-trigger"
-                  onClick={() => setIsMinistriesDropdownOpen(!isMinistriesDropdownOpen)}
-                >
-                  <span>{t('사역 영역', 'Ministries')}</span>
-                  <span className="chevron-icon">⌵</span>
-                </button>
-                <AnimatePresence>
-                  {isMinistriesDropdownOpen && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      transition={{ duration: 0.15 }}
-                      className="nav-dropdown-menu"
-                    >
-                      <Link href="/about#pillars" className="dropdown-menu-item">{t('사역 전체보기', 'All Ministries')}</Link>
-                      <Link href="/ministries/worship" className="dropdown-menu-item">{t('회복 및 예배 사역', 'Restoration & Worship')}</Link>
-                      <Link href="/ministries/missions" className="dropdown-menu-item">{t('국내외 선교 활동', 'Domestic & Global Missions')}</Link>
-                      <Link href="/ministries/service" className="dropdown-menu-item">{t('선교예배', 'Mission Worship')}</Link>
-                      <Link href="/ministries/enterprises" className="dropdown-menu-item">{t('선교사업', 'Mission Enterprises')}</Link>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Right Group */}
-            <div className="nav-group-right">
-              <Link href="/support" className="nav-text-link support-link">
-                <span>{t('후원 안내', 'Support')}</span>
-                <span className="arrow-icon">↗</span>
-              </Link>
-
-              <button 
-                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                className="nav-item-btn lang-select-btn"
-              >
-                <Globe2 size={18} />
-                <span>{language === 'ko' ? 'KO' : 'EN'}</span>
-                <span className="chevron-icon">⌵</span>
-              </button>
-
-              <Link href="/support" className="btn-donate-pill">
-                <span>{t('후원하기', 'Donate')}</span>
-                <span className="plus-icon">+</span>
-              </Link>
-
-              <button 
-                onClick={() => setIsSearchOpen(true)}
-                className="search-toggle-btn"
-                aria-label="Search"
-              >
-                <Search size={22} />
+                <Menu size={22} strokeWidth={1.8} aria-hidden="true" />
               </button>
             </div>
           </div>
         </div>
       </header>
-
-      {/* Full-Screen Search Overlay */}
-      <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="search-overlay"
-          >
-            <button 
-              onClick={() => setIsSearchOpen(false)} 
-              className="search-close-btn"
-              aria-label="Close search"
-            >
-              <X size={32} />
-            </button>
-            
-            <div className="search-form-container">
-              <p className="search-label">{t('검색어를 입력하세요', 'Type to search the site')}</p>
-              <form onSubmit={(e) => { e.preventDefault(); alert(`Search for: ${searchQuery}`); setIsSearchOpen(false); }} className="search-form">
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('검색...', 'Search...')} 
-                  autoFocus 
-                  className="search-input"
-                />
-                <button type="submit" className="search-submit-btn">
-                  <Search size={28} />
-                </button>
-              </form>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Global Navigation Drawer Overlay */}
       <AnimatePresence>
@@ -178,11 +105,15 @@ export const Header: React.FC = () => {
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
             className="drawer-overlay-container"
+            onClick={() => setIsMobileMenuOpen(false)}
           >
-            <div className="mobile-drawer">
+            <div
+              className="mobile-drawer"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="drawer-header">
                 <Link href="/" className="logo-link">
-                  <img src="/logo.svg" alt="CNCC Logo" className="drawer-logo-img" style={{ height: '60px', width: 'auto' }} />
+                  <Image src="/logo.svg" alt="CNCC Logo" className="drawer-logo-img" width={193} height={60} priority />
                 </Link>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -222,25 +153,38 @@ export const Header: React.FC = () => {
           left: 0;
           width: 100%;
           z-index: 100;
+          background-color: transparent;
+          border-bottom: 1px solid transparent;
           transition: all var(--transition-smooth);
         }
 
-        .header-container.transparent-mode {
-          position: absolute;
-          background-color: transparent;
-          border-bottom: none;
+        .header-container.solid-mode {
+          background-color: var(--bg-white);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
           box-shadow: none;
         }
 
-        .header-container.solid-mode {
-          background-color: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(15px);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-          box-shadow: var(--shadow-sm);
+        .header-container:not(.solid-mode) .desktop-nav-links a,
+        .header-container:not(.solid-mode) .nav-item-btn {
+          color: var(--primary-dark);
+        }
+
+        .header-container:not(.solid-mode) .desktop-nav-links a:hover,
+        .header-container:not(.solid-mode) .desktop-nav-links a.active {
+          color: var(--primary-dark);
+        }
+
+        .header-container:not(.solid-mode) .language-switch button {
+          color: #6b7a90;
+        }
+
+        .header-container:not(.solid-mode) .language-switch button.active,
+        .header-container:not(.solid-mode) .language-switch button:hover {
+          color: var(--primary-dark);
         }
 
         .main-navbar {
-          height: 90px;
+          height: var(--header-height);
           display: flex;
           align-items: center;
         }
@@ -250,18 +194,21 @@ export const Header: React.FC = () => {
           justify-content: space-between;
           align-items: center;
           height: 100%;
+          position: relative;
         }
 
         .nav-group-left {
           display: flex;
           align-items: center;
-          gap: 48px;
+          flex: 0 0 220px;
         }
 
         .nav-group-right {
           display: flex;
           align-items: center;
+          justify-content: flex-end;
           gap: 28px;
+          flex: 0 0 220px;
         }
 
         .logo-link {
@@ -274,10 +221,6 @@ export const Header: React.FC = () => {
           width: auto;
           display: block;
           transition: filter var(--transition-fast);
-        }
-
-        .transparent-mode .logo-img {
-          filter: brightness(0) invert(1);
         }
 
         .nav-item-btn {
@@ -293,232 +236,87 @@ export const Header: React.FC = () => {
           padding: 6px 12px;
         }
 
-        .transparent-mode .nav-item-btn {
-          color: var(--text-light);
-        }
-
-        .solid-mode .nav-item-btn {
-          color: var(--text-dark);
-        }
-
         .nav-item-btn:hover {
           color: var(--primary) !important;
         }
 
-        .hamburger-icon {
-          font-size: 1.1rem;
-          line-height: 1;
+        .menu-toggle-btn {
+          display: none;
         }
 
-        .chevron-icon {
-          font-size: 0.75rem;
-          margin-top: -2px;
-        }
-
-        .nav-dropdown-wrapper {
-          position: relative;
-        }
-
-        .nav-dropdown-menu {
+        .desktop-nav-links {
           position: absolute;
-          top: calc(100% + 10px);
-          left: 0;
-          background-color: var(--bg-white);
-          border: 1px solid var(--border-color);
-          box-shadow: var(--shadow-lg);
+          left: 50%;
+          transform: translateX(-50%);
           display: flex;
-          flex-direction: column;
-          min-width: 170px;
-          z-index: 10;
-          padding: 8px 0;
-        }
-
-        .dropdown-menu-item {
-          padding: 10px 18px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: var(--text-dark);
-          transition: var(--transition-fast);
-        }
-
-        .dropdown-menu-item:hover {
-          background-color: var(--secondary-light);
-          color: var(--primary);
-        }
-
-        .nav-text-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 1.15rem;
-          font-weight: 600;
-          transition: var(--transition-fast);
-        }
-
-        .transparent-mode .nav-text-link {
-          color: var(--text-light);
-        }
-
-        .solid-mode .nav-text-link {
-          color: var(--text-dark);
-        }
-
-        .nav-text-link:hover {
-          color: var(--primary) !important;
-        }
-
-        .arrow-icon {
-          font-size: 0.8rem;
-        }
-
-        /* Pill-shaped Donate Button */
-        .btn-donate-pill {
-          display: inline-flex;
           align-items: center;
           justify-content: center;
+          gap: 48px;
+          white-space: nowrap;
+        }
+
+        .desktop-nav-links a {
+          color: #111111;
+          font-size: 1rem;
+          font-weight: 600;
+          letter-spacing: -0.25px;
+          transition: var(--transition-fast);
+        }
+
+        .desktop-nav-links a:hover,
+        .desktop-nav-links a.active {
+          color: var(--primary-dark);
+        }
+
+        .language-switch {
+          display: inline-flex;
+          align-items: center;
           gap: 8px;
-          padding: 12px 26px;
+          font-size: 1rem;
           font-weight: 600;
-          font-size: 1.1rem;
-          border-radius: 30px;
-          transition: all var(--transition-fast);
-          height: 48px;
-        }
-
-        .transparent-mode .btn-donate-pill {
-          background-color: rgba(255, 255, 255, 0.15);
-          color: var(--text-light);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .solid-mode .btn-donate-pill {
-          background-color: var(--secondary-light);
-          color: var(--text-dark);
-          border: 1px solid var(--border-color);
-        }
-
-        .btn-donate-pill:hover {
-          background-color: var(--primary) !important;
-          color: var(--text-light) !important;
-          border-color: var(--primary) !important;
-          transform: translateY(-1px);
-          box-shadow: var(--shadow-sm);
-        }
-
-        .plus-icon {
-          font-weight: 700;
-        }
-
-        .search-toggle-btn {
           transition: var(--transition-fast);
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 8px;
-          border: none;
-          background: none;
-          cursor: pointer;
         }
 
-        .transparent-mode .search-toggle-btn {
-          color: var(--text-light);
+        .language-switch button {
+          color: #a4a7ad;
+          font-size: inherit;
+          font-weight: inherit;
+          transition: var(--transition-fast);
         }
 
-        .solid-mode .search-toggle-btn {
-          color: var(--text-dark);
+        .language-switch button.active {
+          color: #111111;
         }
 
-        .search-toggle-btn:hover {
-          color: var(--primary) !important;
+        .language-switch span {
+          opacity: 0.45;
+        }
+
+        .language-switch button:hover {
+          color: #111111;
         }
 
         @media (max-width: 900px) {
-          .nav-group-left {
-            gap: 20px;
-          }
-          .nav-group-right {
-            gap: 12px;
-          }
-          .support-link,
-          .btn-donate-pill {
+          .desktop-nav-links {
             display: none;
           }
-        }
-
-        /* Search Overlay CSS */
-        .search-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 43, 91, 0.98);
-          z-index: 200;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          color: var(--text-light);
-        }
-
-        .search-close-btn {
-          position: absolute;
-          top: 40px;
-          right: 40px;
-          color: var(--secondary);
-          transition: var(--transition-fast);
-          background: none;
-          border: none;
-          cursor: pointer;
-        }
-
-        .search-close-btn:hover {
-          color: var(--text-light);
-          transform: rotate(90deg);
-        }
-
-        .search-form-container {
-          width: 90%;
-          max-width: 600px;
-        }
-
-        .search-label {
-          font-size: 0.85rem;
-          color: var(--secondary);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin-bottom: 16px;
-        }
-
-        .search-form {
-          display: flex;
-          align-items: center;
-          border-bottom: 2px solid var(--secondary);
-          padding-bottom: 8px;
-        }
-
-        .search-input {
-          background: none;
-          border: none;
-          color: var(--text-light);
-          font-size: 2rem;
-          width: 100%;
-          font-family: var(--font-sans);
-        }
-
-        .search-input:focus {
-          outline: none;
-        }
-
-        .search-submit-btn {
-          color: var(--secondary);
-          transition: var(--transition-fast);
-          background: none;
-          border: none;
-          cursor: pointer;
-        }
-
-        .search-submit-btn:hover {
-          color: var(--text-light);
+          .menu-toggle-btn {
+            display: inline-flex;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+          }
+          .nav-group-left {
+            flex: 1 1 auto;
+            gap: 0;
+          }
+          .nav-group-right {
+            flex: 0 0 auto;
+            gap: 14px;
+          }
         }
 
         /* Full Screen Navigation Drawer CSS */
@@ -591,9 +389,9 @@ export const Header: React.FC = () => {
         }
 
         .drawer-nav-item {
-          font-family: var(--font-serif);
+          font-family: var(--font-sans);
           font-size: 2.8rem;
-          font-weight: 400;
+          font-weight: 600;
           color: var(--text-dark);
           transition: all var(--transition-smooth);
           line-height: 1.1;
@@ -614,7 +412,7 @@ export const Header: React.FC = () => {
 
         .drawer-footer-info .info-label {
           font-size: 0.75rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary);
           text-transform: uppercase;
           letter-spacing: 0.1em;

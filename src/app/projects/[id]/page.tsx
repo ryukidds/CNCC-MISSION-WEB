@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
-import { PageTransition, ScrollReveal } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground } from '@/components/ShaderImage';
 
 interface ProjectDetailProps {
   params: Promise<{ id: string }>;
@@ -106,7 +108,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
         <h2>{t('아티클을 찾을 수 없습니다.', 'Article Not Found')}</h2>
         <p>{t('존재하지 않거나 삭제된 사역 아티클입니다.', 'This article does not exist or has been deleted.')}</p>
         <Link href="/projects" className="btn-primary">
-          <span>{t('사역 블로그로 이동', 'Go to Ministry Blog')}</span>
+          <span>{t('소식으로 이동', 'Go to News')}</span>
         </Link>
         <style jsx>{`
           .error-container {
@@ -136,7 +138,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
         <div className="container breadcrumb-content">
           <Link href="/">{t('홈', 'Home')}</Link>
           <span className="breadcrumb-separator">/</span>
-          <Link href="/projects">{t('블로그 & 소식', 'Blog & News')}</Link>
+          <Link href="/projects">{t('소식', 'News')}</Link>
           <span className="breadcrumb-separator">/</span>
           <span className="current-node">{d(article.title)}</span>
         </div>
@@ -144,10 +146,11 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
 
       {/* Article Hero */}
       <section className="article-hero-section">
+        <ShaderBackground image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
         <div className="container">
           <ScrollReveal>
             <span className="banner-tag">{article.category}</span>
-            <h1>{d(article.title)}</h1>
+            <TextReveal as="h1" lines={[d(article.title)]} />
             <p className="banner-desc">{d(article.summary)}</p>
             <span className="article-hero-date">{article.date}</span>
           </ScrollReveal>
@@ -161,7 +164,15 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
           {/* Featured Image */}
           <ScrollReveal>
             <div className="article-banner-img-wrapper">
-              <img src={article.thumbnail} alt={d(article.title)} className="article-banner-img" />
+              <Image
+                src={article.thumbnail}
+                alt={d(article.title)}
+                className="article-banner-img"
+                width={1200}
+                height={675}
+                sizes="(max-width: 900px) 100vw, 800px"
+                unoptimized
+              />
             </div>
           </ScrollReveal>
 
@@ -176,7 +187,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
           <ScrollReveal>
             <div className="article-footer-nav">
               <Link href="/projects" className="btn-outline back-list-btn">
-                <span>{t('사역 블로그 목록으로', 'Back to Blog List')}</span>
+                <span>{t('소식 목록으로', 'Back to News')}</span>
               </Link>
             </div>
           </ScrollReveal>
@@ -227,15 +238,19 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
           color: var(--text-light);
           padding: 104px 0 112px 0;
           border-bottom: 1px solid rgba(0, 43, 91, 0.12);
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.9), rgba(0, 43, 91, 0.72)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .article-hero-section > .container {
+          position: relative;
+          z-index: 2;
         }
 
         .banner-tag {
           font-size: 0.8rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.14em;
           display: block;
           margin-bottom: 16px;
@@ -260,7 +275,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
           margin-top: 24px;
           color: var(--secondary);
           font-size: 0.9rem;
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.04em;
         }
 
@@ -340,7 +355,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
         }
 
         .back-list-btn {
-          font-weight: 700;
+          font-weight: 600;
         }
       `}</style>
     </PageTransition>

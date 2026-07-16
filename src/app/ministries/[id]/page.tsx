@@ -3,7 +3,8 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
-import { PageTransition, ScrollReveal } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground, ShaderImage } from '@/components/ShaderImage';
 import { Heart, Globe, Activity, Award, ArrowLeft } from 'lucide-react';
 
 interface MinistryDetailProps {
@@ -151,13 +152,14 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
 
       {/* Ministry Hero */}
       <section className="ministry-hero-section">
+        <ShaderBackground image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
         <div className="container">
           <ScrollReveal>
             <div className="ministry-hero-header">
               <span className="ministry-hero-icon">{getIcon(ministry.id)}</span>
               <span className="banner-tag">{t('사역 소개', 'MINISTRY INTRODUCTION')}</span>
             </div>
-            <h1>{d(ministry.title)}</h1>
+            <TextReveal as="h1" lines={[d(ministry.title)]} />
             <p className="banner-desc">{d(ministry.summary)}</p>
           </ScrollReveal>
         </div>
@@ -169,7 +171,7 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
           {/* Featured Image */}
           <ScrollReveal>
             <div className="ministry-banner-img-wrapper">
-              <img src={ministry.thumbnail} alt={d(ministry.title)} className="ministry-banner-img" />
+              <ShaderImage image={ministry.thumbnail} alt={d(ministry.title)} className="ministry-banner-img" />
             </div>
           </ScrollReveal>
 
@@ -186,9 +188,6 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
               <Link href="/" className="btn-outline back-list-btn">
                 <ArrowLeft size={16} />
                 <span>{t('메인 화면으로', 'Back to Home')}</span>
-              </Link>
-              <Link href="/support" className="btn-primary support-btn">
-                <span>{t('사역 후원하기', 'Support this Ministry')}</span>
               </Link>
             </div>
           </ScrollReveal>
@@ -227,9 +226,13 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
           background-color: var(--primary-dark);
           color: var(--text-light);
           padding: 100px 0;
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.9), rgba(0, 43, 91, 0.72)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .ministry-hero-section > .container {
+          position: relative;
+          z-index: 2;
         }
 
         .ministry-hero-header {
@@ -248,7 +251,7 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
         .banner-tag {
           font-size: 0.8rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
@@ -277,7 +280,7 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
         }
 
         .ministry-banner-img-wrapper {
-          border-radius: 16px;
+          border-radius: var(--image-radius);
           overflow: hidden;
           margin-bottom: 56px;
           box-shadow: var(--shadow-md);
@@ -285,8 +288,8 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
 
         .ministry-banner-img {
           width: 100%;
+          aspect-ratio: 16 / 9;
           max-height: 440px;
-          object-fit: cover;
           display: block;
         }
 
@@ -310,7 +313,7 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
           color: var(--primary-dark);
           margin-top: 36px;
           margin-bottom: 16px;
-          font-weight: 700;
+          font-weight: 600;
         }
 
         .ministry-p {

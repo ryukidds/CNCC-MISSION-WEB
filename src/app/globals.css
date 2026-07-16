@@ -3,27 +3,6 @@
 
 @font-face {
     font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
-    font-weight: 100;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
-    font-weight: 200;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
-    font-weight: 300;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
     font-weight: 400;
     font-display: swap;
@@ -31,36 +10,8 @@
 
 @font-face {
     font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
     font-weight: 600;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
-    font-weight: 700;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
-    font-weight: 800;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
-    font-weight: 900;
     font-display: swap;
 }
 
@@ -83,11 +34,15 @@
 
   /* Font Families */
   --font-sans: 'Pretendard', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-serif: 'Instrument Serif', 'Pretendard', serif;
+  --font-display: 'Instrument Serif', 'Pretendard', serif;
+  --font-serif: var(--font-display);
+  --font-regular: 400;
+  --font-semibold: 600;
 
   /* Layout */
-  --max-width: 1280px;
-  --header-height: 80px;
+  --max-width: 1440px;
+  --header-height: 68px;
+  --image-radius: 16px;
 
   /* Shadows (Sophisticated flat design shadows) */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -107,13 +62,13 @@
 
 .instrument-serif-regular {
   font-family: "Instrument Serif", serif;
-  font-weight: 400;
+  font-weight: var(--font-regular);
   font-style: normal;
 }
 
 .instrument-serif-regular-italic {
   font-family: "Instrument Serif", serif;
-  font-weight: 400;
+  font-weight: var(--font-regular);
   font-style: italic;
 }
 
@@ -164,19 +119,33 @@ img {
 /* Layout Utilities */
 .container {
   width: 100%;
-  max-width: 100%;
+  max-width: var(--max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: 4%;
-  padding-right: 4%;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 }
 
 main {
-  padding-top: 90px;
+  padding-top: var(--header-height);
   min-height: 80vh;
 }
 
-body:has(.hero-section) main {
+body:has(.hero-section) main,
+body:has(.about-hero-section) main,
+body:has(.global-header-section) main,
+body:has(.contact-header-section) main,
+body:has(.support-header-section) main,
+body:has(.blog-header-section) main,
+body:has(.article-hero-section) main,
+body:has(.ministry-hero-section) main {
   padding-top: 0;
 }
 
@@ -196,12 +165,81 @@ body:has(.hero-section) main {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-sans);
   color: var(--primary);
-  font-weight: 700;
+  font-weight: var(--font-semibold);
   line-height: 1.25;
 }
 
 .text-center {
   text-align: center;
+}
+
+.banner-tag,
+.section-subtitle,
+.intro-subtitle,
+.intro-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-weight: var(--font-semibold);
+  margin-bottom: 22px !important;
+}
+
+.section-header {
+  margin-bottom: 72px !important;
+}
+
+.section-header h1,
+.section-header h2 {
+  margin-bottom: 24px !important;
+}
+
+.banner-desc {
+  line-height: 1.72 !important;
+}
+
+.hero-section,
+.about-hero-section,
+.global-header-section,
+.contact-header-section,
+.support-header-section,
+.blog-header-section,
+.article-hero-section,
+.ministry-hero-section,
+.promo-hero {
+  background-color: #f6f5ef !important;
+  color: var(--primary-dark) !important;
+}
+
+.hero-display-title,
+.about-hero-section h1,
+.global-header-section h1,
+.contact-header-section h1,
+.support-header-section h1,
+.blog-header-section h1,
+.article-hero-section h1,
+.ministry-hero-section h1,
+.promo-text-content h2 {
+  color: var(--primary-dark) !important;
+}
+
+.about-hero-section .banner-tag,
+.global-header-section .banner-tag,
+.contact-header-section .banner-tag,
+.support-header-section .banner-tag,
+.blog-header-section .banner-tag,
+.article-hero-section .banner-tag,
+.ministry-hero-section .banner-tag {
+  color: var(--primary-dark) !important;
+}
+
+.about-hero-section .banner-desc,
+.global-header-section .banner-desc,
+.contact-header-section .banner-desc,
+.support-header-section .banner-desc,
+.blog-header-section .banner-desc,
+.article-hero-section .banner-desc,
+.ministry-hero-section .banner-desc,
+.promo-text-content p {
+  color: var(--text-muted) !important;
 }
 
 /* Modernized Buttons with centered icons and flat shapes */
@@ -315,4 +353,62 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr;
     gap: 20px;
   }
+}
+
+/* Content text should stay black; mint is reserved for controls/background accents. */
+main :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  li,
+  label,
+  strong,
+  em,
+  .hero-display-title,
+  .hero-copy,
+  .about-display-title,
+  .banner-tag,
+  .banner-desc,
+  .section-subtitle,
+  .intro-subtitle,
+  .intro-label,
+  .intro-serif,
+  .intro-serif-italic,
+  .highlight-text,
+  .promo-text-content h2,
+  .promo-text-content p,
+  .promo-italic,
+  .blog-list-date,
+  .blog-list-readmore,
+  .country-badge,
+  .contact-link,
+  .account-label,
+  .contact-label,
+  .account-number,
+  .contact-phone,
+  .contact-name,
+  .current-node,
+  .history-year,
+  .ministry-hero-icon
+) {
+  color: #111111 !important;
+}
+
+main a:not(.btn-primary):not(.btn-accent):not(.btn-outline) {
+  color: #111111 !important;
+}
+
+main :is(.accent-line, .text-divider) {
+  display: none !important;
+}
+
+main *:not(input):not(textarea):not(select):not(button):not(a) {
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 0 !important;
 }

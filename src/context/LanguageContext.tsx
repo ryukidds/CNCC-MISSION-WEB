@@ -14,11 +14,15 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window === 'undefined') return 'ko';
+  const [language, setLanguageState] = useState<Language>('ko');
+
+  useEffect(() => {
     const savedLang = window.localStorage.getItem('cncc-lang');
-    return savedLang === 'ko' || savedLang === 'en' ? savedLang : 'ko';
-  });
+    if (savedLang === 'ko' || savedLang === 'en') {
+      const timeoutId = window.setTimeout(() => setLanguageState(savedLang), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -26,7 +30,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    window.localStorage.setItem('cncc-lang', lang);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('cncc-lang', lang);
+    }
   };
 
   // Translate static text helper

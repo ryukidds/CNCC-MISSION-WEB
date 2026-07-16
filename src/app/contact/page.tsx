@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { PageTransition, ScrollReveal } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground } from '@/components/ShaderImage';
 
 export default function Contact() {
   const { t } = useLanguage();
@@ -31,10 +32,11 @@ export default function Contact() {
     <PageTransition>
       {/* 1. Header Banner */}
       <section className="contact-header-section">
+        <ShaderBackground image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
         <div className="container">
           <ScrollReveal>
             <span className="banner-tag">{t('연락처 및 오시는 길', 'CONTACT')}</span>
-            <h1>{t('CNCC와 소통하기', 'Get in touch with CNCC')}</h1>
+            <TextReveal as="h1" lines={[t('CNCC와 소통하기', 'Get in touch with CNCC')]} />
             <p className="banner-desc">
               {t(
                 'CNCC 선교회에 대해 궁금하신 점이 있으시거나 동역을 원하신다면 언제든 연락 주십시오. 하나님의 마음으로 정성껏 안내해 드리겠습니다.',
@@ -172,15 +174,19 @@ export default function Contact() {
           color: var(--text-light);
           padding: 104px 0 112px 0;
           border-bottom: 1px solid rgba(0, 43, 91, 0.12);
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.9), rgba(0, 43, 91, 0.72)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .contact-header-section > .container {
+          position: relative;
+          z-index: 2;
         }
 
         .banner-tag {
           font-size: 0.8rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.14em;
           display: block;
           margin-bottom: 16px;
@@ -249,7 +255,7 @@ export default function Contact() {
         .info-detail-item h3 {
           font-family: var(--font-sans);
           font-size: 1rem;
-          font-weight: 700;
+          font-weight: 600;
           margin-bottom: 4px;
         }
 
@@ -280,7 +286,7 @@ export default function Contact() {
         .contact-form h2 {
           font-size: 1.6rem;
           margin-bottom: 10px;
-          font-family: var(--font-serif);
+          font-family: var(--font-sans);
         }
 
         .form-control {
@@ -291,7 +297,7 @@ export default function Contact() {
 
         .form-control label {
           font-size: 0.85rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary);
         }
 

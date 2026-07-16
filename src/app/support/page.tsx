@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { PageTransition, ScrollReveal } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground } from '@/components/ShaderImage';
 
 type LocalizedText = {
   ko: string;
@@ -64,10 +65,11 @@ export default function Support() {
     <PageTransition>
       {/* 1. Header Segment */}
       <section className="support-header-section">
+        <ShaderBackground image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
         <div className="container">
           <ScrollReveal>
             <span className="banner-tag">{t('후원 및 나눔', 'SUPPORT')}</span>
-            <h1>{t('사랑의 실천, 회복을 위한 동참', 'Participate in Restoration')}</h1>
+            <TextReveal as="h1" lines={[t('사랑의 실천, 회복을 위한 동참', 'Participate in Restoration')]} />
             <p className="banner-desc">
               {t(
                 '한 영혼을 회복시키고, 이 땅에 하나님의 사랑과 뜻을 세워가는 이 복된 사역은 기도와 물질의 헌신으로 함께해 주시는 동역자 여러분이 계시기에 가능합니다.',
@@ -230,15 +232,19 @@ export default function Support() {
           color: var(--text-light);
           padding: 104px 0 112px 0;
           border-bottom: 1px solid rgba(0, 43, 91, 0.12);
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.9), rgba(0, 43, 91, 0.72)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .support-header-section > .container {
+          position: relative;
+          z-index: 2;
         }
 
         .banner-tag {
           font-size: 0.8rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.14em;
           display: block;
           margin-bottom: 16px;
@@ -298,7 +304,7 @@ export default function Support() {
         .support-info-card h3 {
           font-size: 1.5rem;
           font-family: var(--font-sans);
-          font-weight: 700;
+          font-weight: 600;
         }
 
         .support-info-card p {
@@ -319,7 +325,7 @@ export default function Support() {
           display: block;
           font-size: 0.75rem;
           color: var(--primary);
-          font-weight: 700;
+          font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           margin-bottom: 6px;
@@ -328,7 +334,7 @@ export default function Support() {
         .account-number,
         .contact-phone {
           font-size: 1.2rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary);
         }
 
@@ -344,7 +350,7 @@ export default function Support() {
           color: var(--text-muted);
           display: block;
           margin-top: 4px;
-          font-weight: 500;
+          font-weight: 400;
         }
 
         /* Support Form segment */
@@ -412,7 +418,7 @@ export default function Support() {
 
         .form-control label {
           font-size: 0.85rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary);
         }
 

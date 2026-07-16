@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground } from '@/components/ShaderImage';
 
 type Branch = {
   id: string;
@@ -53,10 +54,11 @@ export default function GlobalBranches() {
     <PageTransition>
       {/* 1. Header Section */}
       <section className="global-header-section">
+        <ShaderBackground image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
         <div className="container">
           <ScrollReveal>
             <span className="banner-tag">{t('네트워크', 'GLOBAL NETWORK')}</span>
-            <h1>{t('CNCC 해외 지부', 'CNCC Global Branches')}</h1>
+            <TextReveal as="h1" lines={[t('CNCC 해외 지부', 'CNCC Global Branches')]} />
             <p className="banner-desc">
               {t(
                 '우리는 사람과 문화, 교회의 경계를 넘나들며 복음을 실천하기 위해 세계 곳곳의 현지 지부들과 유기적으로 동역하고 있습니다.',
@@ -132,15 +134,19 @@ export default function GlobalBranches() {
           color: var(--text-light);
           padding: 104px 0 112px 0;
           border-bottom: 1px solid rgba(0, 43, 91, 0.12);
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.9), rgba(0, 43, 91, 0.72)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .global-header-section > .container {
+          position: relative;
+          z-index: 2;
         }
 
         .banner-tag {
           font-size: 0.8rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.14em;
           display: block;
           margin-bottom: 16px;
@@ -236,7 +242,7 @@ export default function GlobalBranches() {
           background-color: var(--secondary-light);
           color: var(--primary);
           font-size: 0.7rem;
-          font-weight: 700;
+          font-weight: 600;
           padding: 4px 10px;
           border-radius: 4px;
           text-transform: uppercase;
@@ -248,7 +254,7 @@ export default function GlobalBranches() {
         .branch-card-header h3 {
           font-size: 1.4rem;
           font-family: var(--font-sans);
-          font-weight: 700;
+          font-weight: 600;
         }
 
         .branch-card-body {

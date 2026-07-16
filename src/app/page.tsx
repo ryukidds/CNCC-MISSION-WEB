@@ -2,16 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
-import {
-  Heart,
-  Activity,
-  Award,
-  Globe,
-  ArrowRight
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground } from '@/components/ShaderImage';
 
 type LocalizedText = {
   ko: string;
@@ -31,23 +27,50 @@ type CnccData = {
   articles?: Article[];
 };
 
-// Dynamic icon helper
-const getIcon = (name: string) => {
-  switch (name) {
-    case 'Heart': return <Heart size={28} />;
-    case 'Activity': return <Activity size={28} />;
-    case 'Award': return <Award size={28} />;
-    case 'Globe': return <Globe size={28} />;
-    default: return <Heart size={28} />;
-  }
-};
-
 export default function Home() {
   const { language, t, d } = useLanguage();
   const [dbData, setDbData] = useState<CnccData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const articles = dbData?.articles ?? [];
+  const ministryCards = [
+    {
+      href: '/ministries/worship',
+      image: '/images/homeless-care-16x9-depth-v2.png',
+      title: t('회복 및 예배 사역', 'Restoration & Worship'),
+      desc: t(
+        '사회적 약자들에게 사랑을 실천하며, 특히 목회 사역으로 인해 지친 목회자들의 회복을 돕는 예배 사역과 치유 사역, 그리고 멤버 케어를 중점으로 합니다.',
+        'We serve the marginalized with love, focusing on worship, inner healing, and dedicated member care programs to restore weary pastors.'
+      )
+    },
+    {
+      href: '/ministries/missions',
+      image: '/images/global-mission-16x9-depth-v2.png',
+      title: t('국내외 선교 활동', 'Domestic & Global Missions'),
+      desc: t(
+        '미국, 멕시코, 캐나다, 브라질, 태국, 두바이, 영국, 프랑스 등 다양한 국가에서 단기 선교 및 순회 선교 가운데 예배 사역과 치유 사역을 진행해 왔으며, 해외 선교사님들과 협력하며 그들의 사역을 적극 지원하고 있습니다.',
+        'We conduct short-term and itinerant worship and healing missions in the US, Mexico, Canada, Brazil, Thailand, Dubai, the UK, France, and support overseas missionaries.'
+      )
+    },
+    {
+      href: '/ministries/service',
+      image: '/images/worship-community-16x9-depth-v2.png',
+      title: t('선교예배', 'Mission Worship'),
+      desc: t(
+        '교단을 초월하여 초대교회와 같은 모습으로 함께 드리는 예배입니다. 선교센터에서 열방과 선교지를 위해 중보하며 기도하고, 삶 가운데 역사하시는 하나님을 함께 예배하고 사모합니다.',
+        'Worship that transcends denominations like the early church. We intercede for the nations and worship God who works in our daily lives.'
+      )
+    },
+    {
+      href: '/ministries/enterprises',
+      image: '/images/business-as-mission-16x9-depth-v2.png',
+      title: t('선교사업', 'Mission Enterprises'),
+      desc: t(
+        '꼬망쎄, CNCC학원, CNCC국제학교, CNCC유학컨설팅을 운영하며 모든 사업장을 선교센터로 여기고 있습니다. 무료 반찬 나눔과 지역사회 기부, 장학 지원 등 실질적이고 따뜻한 섬김을 전합니다.',
+        'We operate Commencer, CNCC Academy, CNCC International School, and CNCC Study Abroad Consulting as mission centers that serve neighbors through practical care.'
+      )
+    }
+  ];
 
   // Fetch dynamic content from local API
   useEffect(() => {
@@ -98,19 +121,24 @@ export default function Home() {
   return (
     <PageTransition>
       {/* 1. HERO BANNER */}
-      <section
-        className="hero-section"
-        style={{ backgroundImage: `linear-gradient(90deg, rgba(0, 43, 91, 0.78), rgba(0, 43, 91, 0.42)), url('/images/cncc_hero_vision.png')` }}
-      >
+      <section className="hero-section">
+        <ShaderBackground image="/images/cncc_hero_vision.png" overlay="rgba(255, 255, 255, 0.58)" />
         <div className="container hero-content">
-          <motion.h1
-            initial={{ y: 40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
+          <TextReveal
+            as="h1"
             className="hero-display-title"
-          >
-            Coram Deo<br /> New <span className="hero-italic">Creation</span>
-          </motion.h1>
+            lines={[
+              ['Coram', 'Deo'],
+              ['New', { text: 'Creation', className: 'hero-italic' }]
+            ]}
+          />
+          <p className="hero-copy">{t(
+            '한 영혼을 회복시키고, 이 땅에 하나님의 사랑과 뜻을 세워가는 복된 사역에 함께해 주세요.',
+            'Join this blessed ministry of restoring souls and establishing God\'s love and will on this earth.'
+          )}</p>
+          <Link href="/support" className="btn-primary">
+            {t('봉사 및 동참하기', 'Volunteer & Join Us')}
+          </Link>
         </div>
       </section>
 
@@ -119,19 +147,64 @@ export default function Home() {
         <div className="container">
           <div className="intro-section">
             <ScrollReveal>
-              <span className="intro-subtitle">{t('비전', 'VISION')}</span>
+              <motion.div
+                className="intro-logo-mark"
+                initial={{ opacity: 0, y: 28, scale: 0.92, filter: 'blur(12px)' }}
+                whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Image
+                  src="/logo.svg"
+                  alt="CNCC Missionary"
+                  width={280}
+                  height={96}
+                  className="intro-logo-img"
+                />
+              </motion.div>
+              <TextReveal as="span" className="intro-subtitle" lines={[t('비전', 'VISION')]} delay={0.24} />
               {language === 'ko' ? (
-                <h2 className="intro-text">
-                  <span className="intro-serif">&apos;코람데오&apos;</span>(Coram Deo)는 &apos;하나님 앞에서&apos;라는 뜻입니다.<br className="desktop-only" />
-                  한 사람의 삶이 하나님 앞에서 반응할 때 하나님의 마음으로 다시 세워지고,<br className="desktop-only" />
-                  회복과 치유가 일어나며 그 한 영혼이 <span className="intro-serif-italic">&apos;새로워지는 일&apos;</span>(New Creation)에 집중하는 선교단체입니다.
-                </h2>
+                <>
+                  <TextReveal
+                    as="h2"
+                    className="intro-text intro-text-desktop"
+                    mode="line"
+                    delay={0.38}
+                    lines={[
+                      <><span className="intro-serif">&apos;코람데오&apos;</span>(Coram Deo)는 &apos;하나님 앞에서&apos;라는 뜻입니다.</>,
+                      '한 사람의 삶이 하나님 앞에서 반응할 때',
+                      '하나님의 마음으로 다시 세워지고,',
+                      '회복과 치유가 일어나며 그 한 영혼이',
+                      <><span className="intro-serif-italic">&apos;새로워지는 일&apos;</span>(New Creation)에 집중하는 선교단체입니다.</>
+                    ]}
+                  />
+                  <TextReveal
+                    as="h2"
+                    className="intro-text intro-text-mobile"
+                    mode="line"
+                    delay={0.38}
+                    lines={[
+                      <><span className="intro-serif">&apos;코람데오&apos;</span>(Coram Deo)는</>,
+                      <>&apos;하나님 앞에서&apos;라는 뜻입니다.</>,
+                      '한 사람의 삶이 하나님 앞에서 반응할 때',
+                      '하나님의 마음으로 다시 세워지고,',
+                      '회복과 치유가 일어나며 그 한 영혼이',
+                      <><span className="intro-serif-italic">&apos;새로워지는 일&apos;</span>(New Creation)에 집중하는 선교단체입니다.</>
+                    ]}
+                  />
+                </>
               ) : (
-                <h2 className="intro-text">
-                  <span className="intro-serif">&apos;Coram Deo&apos;</span> means &apos;in the presence of God.&apos;<br className="desktop-only" />
-                  When a person&apos;s life responds before God, they are rebuilt with God&apos;s heart,<br className="desktop-only" />
-                  experiencing restoration and healing. We are a mission organization focused on the renewal of each soul as a <span className="intro-serif-italic">&apos;New Creation.&apos;</span>
-                </h2>
+                <TextReveal
+                  as="h2"
+                  className="intro-text"
+                  mode="line"
+                  delay={0.38}
+                  lines={[
+                    <><span className="intro-serif">&apos;Coram Deo&apos;</span> means &apos;in the presence of God.&apos;</>,
+                    'When a person\'s life responds before God, they are rebuilt with God\'s heart,',
+                    <>experiencing restoration and healing. We are a mission organization focused on the renewal of each soul as a <span className="intro-serif-italic">&apos;New Creation.&apos;</span></>
+                  ]}
+                />
               )}
             </ScrollReveal>
           </div>
@@ -151,131 +224,22 @@ export default function Home() {
 
           <StaggerContainer>
             <div className="grid-2">
-              {/* Card 1: 회복 및 예배 사역 */}
-              <StaggerItem>
-                <Link href="/ministries/worship" className="ministry-card">
-                  <div className="ministry-card-header">
-                    <span className="ministry-icon">{getIcon('Heart')}</span>
-                    <h3>{t('회복 및 예배 사역', 'Restoration & Worship')}</h3>
-                  </div>
-                  <p>
-                    {t(
-                      '사회적 약자들에게 사랑을 실천하며, 특히 목회 사역으로 인해 지친 목회자들의 회복을 돕는 예배 사역과 치유 사역, 그리고 멤버 케어를 중점으로 합니다.',
-                      'We serve the marginalized with love, focusing on worship, inner healing, and dedicated member care programs to restore weary pastors.'
-                    )}
-                  </p>
-                  <div className="ministry-sub-items">
-                    <span className="ministry-sub-item">✦ {t('목회자 회복 사역', 'Pastoral Restoration')}</span>
-                    <span className="ministry-sub-item">✦ {t('치유 사역 & 멤버 케어', 'Healing & Member Care')}</span>
-                  </div>
-                </Link>
-              </StaggerItem>
-
-              {/* Card 2: 국내외 선교 활동 */}
-              <StaggerItem>
-                <Link href="/ministries/missions" className="ministry-card">
-                  <div className="ministry-card-header">
-                    <span className="ministry-icon">{getIcon('Globe')}</span>
-                    <h3>{t('국내외 선교 활동', 'Domestic & Global Missions')}</h3>
-                  </div>
-                  <p>
-                    {t(
-                      '미국, 멕시코, 캐나다, 브라질, 태국, 두바이, 영국, 프랑스 등 다양한 국가에서 단기 선교 및 순회 선교 가운데 예배 사역과 치유 사역을 진행해 왔으며, 해외 선교사님들과 협력하며 그들의 사역을 적극 지원하고 있습니다.',
-                      'We conduct short-term and itinerant worship and healing missions in US, Mexico, Canada, Brazil, Thailand, Dubai, UK, France, and actively support overseas missionaries.'
-                    )}
-                  </p>
-                  <div className="ministry-sub-items">
-                    <span className="ministry-sub-item">✦ {t('단기 선교 & 순회 사역', 'Short-term & Itinerant Missions')}</span>
-                    <span className="ministry-sub-item">✦ {t('글로벌 선교 협력 지원', 'Missionary Partnerships')}</span>
-                  </div>
-                </Link>
-              </StaggerItem>
-
-              {/* Card 3: 선교예배 */}
-              <StaggerItem>
-                <Link href="/ministries/service" className="ministry-card">
-                  <div className="ministry-card-header">
-                    <span className="ministry-icon">{getIcon('Activity')}</span>
-                    <h3>{t('선교예배', 'Mission Worship')}</h3>
-                  </div>
-                  <p>
-                    {t(
-                      '교단을 초월하여 초대교회와 같은 모습으로 함께 드리는 예배입니다. 선교센터에서 열방과 선교지를 위해 중보하며 기도하고, 삶 가운데 역사하시는 하나님을 함께 예배하고 사모합니다.',
-                      'Worship transcending denominations like the early church. We intercede for the nations and worship God who works in our daily lives.'
-                    )}
-                  </p>
-                  <div className="ministry-sub-items" style={{ marginTop: 'auto' }}>
-                    <span className="ministry-sub-item" style={{ backgroundColor: 'var(--primary)', color: 'var(--text-light)' }}>
-                      ⏰ {t('정기 목요선교예배 : 매주 목요일 오후 7시 30분', 'Thursday Worship: Every Thurs 7:30 PM')}
-                    </span>
-                  </div>
-                </Link>
-              </StaggerItem>
-
-              {/* Card 4: 선교사업 */}
-              <StaggerItem>
-                <Link href="/ministries/enterprises" className="ministry-card">
-                  <div className="ministry-card-header">
-                    <span className="ministry-icon">{getIcon('Award')}</span>
-                    <h3>{t('선교사업', 'Mission Enterprises')}</h3>
-                  </div>
-                  <p>
-                    {t(
-                      '꼬망쎄(대치점, 평택고덕점), CNCC학원(잠실캠퍼스, 대치캠퍼스), CNCC국제학교, CNCC유학컨설팅을 운영하며 모든 사업장을 선교센터로 여기고 있습니다. 무료 반찬 나눔과 지역사회 기부, 교육 소외계층을 위한 장학 지원 등 실질적이고 따뜻한 섬김을 전합니다.',
-                      'Operating Commencer, CNCC Academy, CNCC International School, CNCC Study Abroad Consulting as mission centers. We serve the community through free side-dishes, donations, and scholarships.'
-                    )}
-                  </p>
-                  <div className="ministry-sub-items" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: '8px' }}>
-                    <span className="ministry-sub-item">✦ 꼬망쎄 (대치 · 평택고덕)</span>
-                    <span className="ministry-sub-item">✦ CNCC학원 (잠실 · 대치)</span>
-                    <span className="ministry-sub-item">✦ CNCC국제학교 / 유학컨설팅</span>
-                  </div>
-                </Link>
-              </StaggerItem>
-            </div>
-          </StaggerContainer>
-        </div>
-      </section>
-
-      {/* 3. CORPORATE BLOG / PROJECT SHOWCASE */}
-      <section className="section-padding blog-showcase-section">
-        <div className="container">
-          <ScrollReveal>
-            <div className="section-header flex-header">
-              <div>
-                <h2>News</h2>
-              </div>
-              <Link href="/projects" className="btn-outline view-all-btn">
-                <span>{t('블로그 전체 보기', 'View All Posts')}</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </ScrollReveal>
-
-          <StaggerContainer>
-            <div className="blog-list-container">
-              {articles.slice(0, 3).map((post) => (
-                <StaggerItem key={post.id}>
-                  <div className="blog-list-item">
-                    <Link href={`/projects/${post.id}`} className="blog-list-image-link" aria-label={d(post.title)}>
-                      <div className="blog-list-img-wrapper" aria-hidden="true">
-                        <img src={post.thumbnail} alt={d(post.title)} className="blog-list-img" />
-                      </div>
-                    </Link>
-                    <div className="blog-list-body">
-                      <span className="blog-list-date">{post.date}</span>
-                      <Link href={`/projects/${post.id}`} className="blog-list-title-link">
-                        <h3>{d(post.title)}</h3>
-                      </Link>
-                      <p>{d(post.summary)}</p>
+              {ministryCards.map((card) => (
+                <StaggerItem key={card.href}>
+                  <Link href={card.href} className="ministry-card">
+                    <Image
+                      src={card.image}
+                      alt={card.title}
+                      width={1600}
+                      height={900}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="ministry-card-image"
+                    />
+                    <div className="ministry-card-text">
+                      <h3>{card.title}</h3>
+                      <p>{card.desc}</p>
                     </div>
-                    <div className="blog-list-action">
-                      <Link href={`/projects/${post.id}`} className="blog-list-readmore">
-                        <span>{t('자세히 읽기', 'Read Article')}</span>
-                        <ArrowRight size={14} />
-                      </Link>
-                    </div>
-                  </div>
+                  </Link>
                 </StaggerItem>
               ))}
             </div>
@@ -283,9 +247,65 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 3. CORPORATE BLOG / PROJECT SHOWCASE */}
+      {articles.length > 0 && (
+        <section className="section-padding blog-showcase-section">
+          <div className="container">
+            <ScrollReveal>
+              <div className="section-header flex-header">
+                <div>
+                  <h2>News</h2>
+                </div>
+                <Link href="/projects" className="btn-outline view-all-btn">
+                  <span>{t('소식 전체 보기', 'View All News')}</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+            </ScrollReveal>
+
+            <StaggerContainer>
+              <div className="blog-list-container">
+                {articles.slice(0, 3).map((post) => (
+                  <StaggerItem key={post.id}>
+                    <div className="blog-list-item">
+                      <Link href={`/projects/${post.id}`} className="blog-list-image-link" aria-label={d(post.title)}>
+                        <div className="blog-list-img-wrapper" aria-hidden="true">
+                          <Image
+                            src={post.thumbnail}
+                            alt={d(post.title)}
+                            className="blog-list-img"
+                            fill
+                            sizes="(max-width: 768px) 82vw, 33vw"
+                            unoptimized
+                          />
+                        </div>
+                      </Link>
+                      <div className="blog-list-body">
+                        <span className="blog-list-date">{post.date}</span>
+                        <Link href={`/projects/${post.id}`} className="blog-list-title-link">
+                          <h3>{d(post.title)}</h3>
+                        </Link>
+                        <p>{d(post.summary)}</p>
+                      </div>
+                      <div className="blog-list-action">
+                        <Link href={`/projects/${post.id}`} className="blog-list-readmore">
+                          <span>{t('자세히 읽기', 'Read Article')}</span>
+                          <ArrowRight size={14} />
+                        </Link>
+                      </div>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </div>
+            </StaggerContainer>
+          </div>
+        </section>
+      )}
+
       {/* 4. CAREERS / VOLUNTEER CTA */}
       <section className="promo-section-outer">
         <div className="promo-hero">
+          <ShaderBackground image="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
           <div className="container promo-hero-content">
             <ScrollReveal>
               <div className="promo-text-content">
@@ -310,11 +330,10 @@ export default function Home() {
           height: 100vh;
           min-height: 500px;
           position: relative;
-          background-size: cover;
-          background-position: center;
           display: flex;
           align-items: center;
           justify-content: center;
+          overflow: hidden;
         }
 
         .hero-content {
@@ -322,6 +341,10 @@ export default function Home() {
           z-index: 10;
           text-align: center;
           width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 24px;
         }
 
         .hero-display-title {
@@ -332,6 +355,14 @@ export default function Home() {
           font-weight: 400;
           letter-spacing: 0;
           text-shadow: none !important;
+          text-align: center;
+        }
+
+        .hero-copy {
+          max-width: 620px;
+          color: var(--text-muted);
+          font-size: 1.05rem;
+          line-height: 1.7;
           text-align: center;
         }
 
@@ -354,11 +385,23 @@ export default function Home() {
           text-align: center;
         }
 
+        .intro-logo-mark {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 42px;
+        }
+
+        .intro-logo-img {
+          width: min(280px, 72vw);
+          height: auto;
+          display: block;
+        }
+
         .intro-subtitle {
-          font-family: var(--font-serif);
+          font-family: var(--font-sans);
           font-size: 1.25rem;
           color: var(--text-muted);
-          font-weight: 400;
+          font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
           margin-bottom: 32px;
@@ -373,6 +416,10 @@ export default function Home() {
           color: var(--primary-dark);
           word-break: keep-all;
           letter-spacing: -0.25px;
+        }
+
+        .intro-text-mobile {
+          display: none;
         }
 
         .intro-serif {
@@ -396,10 +443,22 @@ export default function Home() {
           .intro-section {
             padding: 80px 0;
           }
+          .intro-logo-mark {
+            margin-bottom: 30px;
+          }
+          .intro-logo-img {
+            width: min(180px, 62vw);
+          }
           .intro-text {
-            font-size: 2.0rem;
-            line-height: 1.4;
-            padding: 0 15px;
+            font-size: clamp(1.65rem, 7vw, 2rem);
+            line-height: 1.42;
+            padding: 0;
+          }
+          .intro-text-desktop {
+            display: none;
+          }
+          .intro-text-mobile {
+            display: block;
           }
           .desktop-only {
             display: none;
@@ -414,6 +473,12 @@ export default function Home() {
           .hero-display-title {
             font-size: 12vw;
           }
+          .hero-content {
+            gap: 20px;
+          }
+          .hero-copy {
+            font-size: 0.98rem;
+          }
         }
 
         /* Section Header Layout */
@@ -423,10 +488,10 @@ export default function Home() {
         }
 
         .section-subtitle {
-          font-family: var(--font-serif);
+          font-family: var(--font-sans);
           font-size: 0.95rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
           display: block;
@@ -474,71 +539,37 @@ export default function Home() {
         }
 
         .ministry-card {
-          background-color: var(--bg-white);
-          padding: 40px;
-          border-radius: 16px;
-          border: 1px solid var(--border-color);
-          box-shadow: var(--shadow-sm);
+          display: block;
           transition: var(--transition-smooth);
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
+          min-width: 0;
         }
 
         .ministry-card:hover {
-          transform: translateY(-6px);
-          background-color: var(--bg-white);
-          box-shadow: var(--shadow-md);
-          border-color: var(--primary);
+          transform: translateY(-4px);
         }
 
-        .ministry-card-header {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          border-bottom: 1px solid var(--border-color);
-          padding-bottom: 16px;
-        }
-
-        .ministry-icon {
-          color: var(--primary);
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+        .ministry-card-image {
+          display: block;
+          width: 100%;
+          height: auto;
+          aspect-ratio: 16 / 9;
+          object-fit: cover;
+          border-radius: var(--image-radius);
+          margin-bottom: 28px;
         }
 
         .ministry-card h3 {
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: var(--primary-dark);
-          margin-bottom: 0;
+          font-size: 2rem;
+          font-weight: 600;
+          color: #111111;
+          line-height: 1.2;
+          margin-bottom: 18px;
         }
 
         .ministry-card p {
-          font-size: 0.95rem;
-          color: var(--text-muted);
+          font-size: 1rem;
+          color: #222222;
           line-height: 1.6;
-        }
-
-        .ministry-sub-items {
-          margin-top: 10px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .ministry-sub-item {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: var(--primary-dark);
-          background-color: var(--secondary-light);
-          padding: 6px 14px;
-          border-radius: 20px;
-          width: fit-content;
         }
 
         /* Blog Showcase Section */
@@ -556,7 +587,6 @@ export default function Home() {
         .blog-list-image-link {
           display: block;
           overflow: hidden;
-          border-radius: 8px;
         }
 
         .blog-list-item {
@@ -576,7 +606,7 @@ export default function Home() {
           width: 100%;
           aspect-ratio: 16 / 9;
           overflow: hidden;
-          border-radius: 8px;
+          border-radius: var(--image-radius);
           background-color: var(--secondary-light);
         }
 
@@ -610,7 +640,7 @@ export default function Home() {
 
         .blog-list-body h3 {
           font-size: 1.35rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary-dark);
           margin-bottom: 10px;
           line-height: 1.3;
@@ -643,7 +673,7 @@ export default function Home() {
           align-items: center;
           gap: 6px;
           font-size: 0.85rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary);
         }
 
@@ -676,13 +706,14 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.86), rgba(0, 43, 91, 0.54)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
           padding: 120px 0;
         }
 
         .promo-hero-content {
+          position: relative;
+          z-index: 2;
           color: var(--text-light);
           text-align: center;
         }
@@ -732,12 +763,19 @@ export default function Home() {
         .grid-2 {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 32px;
+          column-gap: 40px;
+          row-gap: 72px;
         }
         @media (max-width: 768px) {
           .grid-2 {
             grid-template-columns: 1fr;
-            gap: 20px;
+            row-gap: 44px;
+          }
+          .ministry-card-image {
+            margin-bottom: 22px;
+          }
+          .ministry-card h3 {
+            font-size: 1.65rem;
           }
         }
       `}</style>

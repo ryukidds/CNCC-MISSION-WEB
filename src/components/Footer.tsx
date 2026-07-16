@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
-import { ArrowUp, Heart, Phone, Mail, MapPin } from 'lucide-react';
+import { ArrowUp, Phone, Mail, MapPin } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
   const handleScrollToTop = () => {
     window.scrollTo({
@@ -22,11 +23,15 @@ export const Footer: React.FC = () => {
         <div className="footer-middle">
           <div className="footer-info-side">
             <Link href="/" className="footer-logo">
-              <img src="/logo.svg" alt="CNCC Logo" className="footer-logo-img" style={{ height: '54px', width: 'auto' }} />
+              <Image src="/logo.svg" alt="CNCC Logo" className="footer-logo-img" width={174} height={54} />
             </Link>
             <p className="footer-desc">
-              {t(
-                'CNCC 선교회는 하나님의 임재 앞에서 살아가는 ‘코람데오’의 태도로 회복과 치유, 그리고 새로운 피조물로의 변화를 이끄는 공동체입니다.',
+              {language === 'ko' ? (
+                <>
+                  CNCC 선교회는 하나님의 임재 앞에서 살아가는 ‘코람데오’의 태도로 회복과 치유,<br />
+                  그리고 새로운 피조물로의 변화를 이끄는 공동체입니다.
+                </>
+              ) : (
                 'CNCC Missionary leads restoration, holistic healing, and transformation into new creations in the presence of God.'
               )}
             </p>
@@ -51,7 +56,7 @@ export const Footer: React.FC = () => {
               <div className="footer-link-col">
                 <h3>{t('선교회 안내', 'Information')}</h3>
                 <ul>
-                  <li><Link href="/about">{t('선교회 소개', 'About Us')}</Link></li>
+                  <li><Link href="/about">{t('소개', 'About')}</Link></li>
                   <li><Link href="/about#vision">{t('비전 & 미션', 'Vision & Mission')}</Link></li>
                   <li><Link href="/about#timeline">{t('선교회 연혁', 'Our History')}</Link></li>
                 </ul>
@@ -60,7 +65,7 @@ export const Footer: React.FC = () => {
               <div className="footer-link-col">
                 <h3>{t('사역 소식', 'Ministries')}</h3>
                 <ul>
-                  <li><Link href="/projects">{t('선교회 소식 / 블로그', 'Blog & News')}</Link></li>
+                  <li><Link href="/projects">{t('소식', 'News')}</Link></li>
                   <li><Link href="/global">{t('해외 선교 지부', 'Global Branches')}</Link></li>
                 </ul>
               </div>
@@ -89,10 +94,6 @@ export const Footer: React.FC = () => {
                 'Copyright © 2026 CNCC Missionary. All rights reserved.'
               )}
             </p>
-            <span className="footer-divider">|</span>
-            <Link href="/admin" className="footer-admin-link">
-              {t('관리자 CMS', 'CMS Admin')}
-            </Link>
           </div>
           
           <button 
@@ -206,7 +207,7 @@ export const Footer: React.FC = () => {
         .footer-link-col h3 {
           color: rgba(255, 255, 255, 0.45);
           font-size: 0.85rem;
-          font-weight: 700;
+          font-weight: 600;
           margin-bottom: 20px;
           font-family: var(--font-sans);
           letter-spacing: 0.1em;
@@ -273,22 +274,6 @@ export const Footer: React.FC = () => {
           align-items: center;
           gap: 12px;
           flex-wrap: wrap;
-        }
-
-        .footer-divider {
-          color: rgba(255, 255, 255, 0.2);
-          font-size: 0.8rem;
-        }
-
-        .footer-admin-link {
-          font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.45);
-          transition: var(--transition-fast);
-        }
-
-        .footer-admin-link:hover {
-          color: var(--accent);
-          text-decoration: underline;
         }
 
         .copyright {

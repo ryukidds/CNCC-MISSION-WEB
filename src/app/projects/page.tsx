@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
-import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem } from '@/components/FramerTransitions';
+import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem, TextReveal } from '@/components/FramerTransitions';
+import { ShaderBackground } from '@/components/ShaderImage';
 
 type LocalizedText = {
   ko: string;
@@ -63,10 +65,11 @@ export default function Projects() {
     <PageTransition>
       {/* Header Section */}
       <section className="blog-header-section">
+        <ShaderBackground image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
         <div className="container">
           <ScrollReveal>
-            <span className="banner-tag">{t('소식 & 블로그', 'BLOG & NEWS')}</span>
-            <h1>{t('CNCC 소식 & 블로그', 'CNCC Blog & News')}</h1>
+            <span className="banner-tag">{t('소식', 'NEWS')}</span>
+            <TextReveal as="h1" lines={[t('CNCC 소식', 'CNCC News')]} />
             <p className="banner-desc">
               {t(
                 '복음 안에서 새로운 피조물로 변화되는 현장, 그리고 이웃들과 나누는 정직한 기쁨의 기록들을 전해드립니다.',
@@ -77,7 +80,7 @@ export default function Projects() {
         </div>
       </section>
 
-      {/* Main Blog Body */}
+      {/* Main News Body */}
       <section className="section-padding blog-main-section">
         <div className="container">
           {/* Category Filters */}
@@ -112,7 +115,14 @@ export default function Projects() {
                     <div className="blog-list-item">
                       <Link href={`/projects/${post.id}`} className="blog-list-image-link" aria-label={d(post.title)}>
                         <div className="blog-list-img-wrapper" aria-hidden="true">
-                          <img src={post.thumbnail} alt={d(post.title)} className="blog-card-img" />
+                          <Image
+                            src={post.thumbnail}
+                            alt={d(post.title)}
+                            className="blog-card-img"
+                            fill
+                            sizes="(max-width: 768px) 82vw, 33vw"
+                            unoptimized
+                          />
                         </div>
                       </Link>
                       <div className="blog-card-body">
@@ -143,15 +153,19 @@ export default function Projects() {
           color: var(--text-light);
           padding: 104px 0 112px 0;
           border-bottom: 1px solid rgba(0, 43, 91, 0.12);
-          background-image: linear-gradient(90deg, rgba(0, 43, 91, 0.9), rgba(0, 43, 91, 0.72)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .blog-header-section > .container {
+          position: relative;
+          z-index: 2;
         }
 
         .banner-tag {
           font-size: 0.8rem;
           color: var(--accent);
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.14em;
           display: block;
           margin-bottom: 16px;
@@ -203,7 +217,7 @@ export default function Projects() {
           box-shadow: var(--shadow-sm);
         }
 
-        /* Main Blog Section styles */
+        /* Main News Section styles */
         .blog-main-section {
           background-color: var(--bg-light);
         }
@@ -255,7 +269,6 @@ export default function Projects() {
         .blog-list-image-link {
           display: block;
           overflow: hidden;
-          border-radius: 8px;
         }
 
         .blog-list-item {
@@ -275,7 +288,7 @@ export default function Projects() {
           width: 100%;
           aspect-ratio: 16 / 9;
           overflow: hidden;
-          border-radius: 8px;
+          border-radius: var(--image-radius);
           background-color: var(--secondary-light);
         }
 
@@ -333,7 +346,7 @@ export default function Projects() {
           align-items: center;
           gap: 6px;
           font-size: 0.85rem;
-          font-weight: 700;
+          font-weight: 600;
           color: var(--primary);
         }
 
