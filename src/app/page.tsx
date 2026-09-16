@@ -36,7 +36,7 @@ export default function Home() {
   const ministryCards = [
     {
       href: '/ministries/worship',
-      image: '/images/homeless-care-16x9-depth-v2.png',
+      image: '/images/ministries/worship-ministry.jpg',
       title: t('회복 및 예배 사역', 'Restoration & Worship'),
       desc: t(
         '사회적 약자들에게 사랑을 실천하며, 특히 목회 사역으로 인해 지친 목회자들의 회복을 돕는 예배 사역과 치유 사역, 그리고 멤버 케어를 중점으로 합니다.',
@@ -45,7 +45,7 @@ export default function Home() {
     },
     {
       href: '/ministries/missions',
-      image: '/images/global-mission-16x9-depth-v2.png',
+      image: '/images/ministries/missions-global.jpg',
       title: t('국내외 선교 활동', 'Domestic & Global Missions'),
       desc: t(
         '미국, 멕시코, 캐나다, 브라질, 태국, 두바이, 영국, 프랑스 등 다양한 국가에서 단기 선교 및 순회 선교 가운데 예배 사역과 치유 사역을 진행해 왔으며, 해외 선교사님들과 협력하며 그들의 사역을 적극 지원하고 있습니다.',
@@ -54,7 +54,7 @@ export default function Home() {
     },
     {
       href: '/ministries/service',
-      image: '/images/worship-community-16x9-depth-v2.png',
+      image: '/images/ministries/mission-worship.jpg',
       title: t('선교예배', 'Mission Worship'),
       desc: t(
         '교단을 초월하여 초대교회와 같은 모습으로 함께 드리는 예배입니다. 선교센터에서 열방과 선교지를 위해 중보하며 기도하고, 삶 가운데 역사하시는 하나님을 함께 예배하고 사모합니다.',
@@ -63,7 +63,7 @@ export default function Home() {
     },
     {
       href: '/ministries/enterprises',
-      image: '/images/business-as-mission-16x9-depth-v2.png',
+      image: '/images/ministries/enterprises-bam.jpg',
       title: t('선교사업', 'Mission Enterprises'),
       desc: t(
         '꼬망쎄, CNCC학원, CNCC국제학교, CNCC유학컨설팅을 운영하며 모든 사업장을 선교센터로 여기고 있습니다. 무료 반찬 나눔과 지역사회 기부, 장학 지원 등 실질적이고 따뜻한 섬김을 전합니다.',
@@ -305,7 +305,7 @@ export default function Home() {
       {/* 4. CAREERS / VOLUNTEER CTA */}
       <section className="promo-section-outer">
         <div className="promo-hero">
-          <ShaderBackground image="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600&auto=format&fit=crop" overlay="rgba(255, 255, 255, 0.62)" />
+          <ShaderBackground image="/images/about/cncc-community.jpg" overlay="rgba(255, 255, 255, 0.62)" />
           <div className="container promo-hero-content">
             <ScrollReveal>
               <div className="promo-text-content">

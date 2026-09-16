@@ -85,7 +85,17 @@ export default function About() {
             <ScrollReveal className="intro-text-block">
               <span className="intro-label">{t('소개', 'WHO WE ARE')}</span>
               <h1 className="about-display-title">Restoration, Healing, and Transformation</h1>
-              <div className="group-photo-placeholder" aria-hidden="true" />
+              <div className="group-photo-container">
+                <Image
+                  src="/images/about/cncc-community.jpg"
+                  alt={t('CNCC 선교회 공동체', 'CNCC Community')}
+                  width={2000}
+                  height={1126}
+                  sizes="(max-width: 980px) 100vw, 980px"
+                  className="group-photo-img"
+                  priority
+                />
+              </div>
               <div className="text-divider"></div>
               <p className="highlight-text">
                 {t(
@@ -160,7 +170,7 @@ export default function About() {
               <Link href="/ministries/worship" className="pillar-card">
                 <div className="pillar-image">
                   <Image
-                    src="/images/homeless-care-16x9-depth-v2.png"
+                    src="/images/ministries/worship-ministry.jpg"
                     alt={t('회복 및 예배 사역', 'Restoration & Worship')}
                     width={1672}
                     height={941}
@@ -185,7 +195,7 @@ export default function About() {
               <Link href="/ministries/missions" className="pillar-card">
                 <div className="pillar-image">
                   <Image
-                    src="/images/global-mission-16x9-depth-v2.png"
+                    src="/images/ministries/missions-global.jpg"
                     alt={t('국내외 선교 활동', 'Domestic & Global Missions')}
                     width={1672}
                     height={941}
@@ -210,7 +220,7 @@ export default function About() {
               <Link href="/ministries/service" className="pillar-card">
                 <div className="pillar-image">
                   <Image
-                    src="/images/worship-community-16x9-depth-v2.png"
+                    src="/images/ministries/mission-worship.jpg"
                     alt={t('선교예배', 'Mission Worship')}
                     width={1672}
                     height={941}
@@ -235,7 +245,7 @@ export default function About() {
               <Link href="/ministries/enterprises" className="pillar-card">
                 <div className="pillar-image">
                   <Image
-                    src="/images/business-as-mission-16x9-depth-v2.png"
+                    src="/images/ministries/enterprises-bam.jpg"
                     alt={t('선교사업', 'Mission Enterprises')}
                     width={1672}
                     height={941}
@@ -350,12 +360,20 @@ export default function About() {
           width: 100%;
         }
 
-        .group-photo-placeholder {
+        .group-photo-container {
           width: 100%;
-          aspect-ratio: 16 / 7;
-          background: linear-gradient(135deg, #d8d8d8, #eeeeee);
           border-radius: var(--image-radius);
+          overflow: hidden;
           margin: 44px 0 34px;
+          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+          background-color: var(--bg-light);
+        }
+
+        .group-photo-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          object-fit: cover;
         }
 
         .intro-label {
@@ -393,9 +411,9 @@ export default function About() {
           .intro-stack {
             gap: 48px;
           }
-          .group-photo-placeholder {
-            aspect-ratio: 4 / 3;
+          .group-photo-container {
             margin: 34px 0 28px;
+            border-radius: 12px;
           }
         }
 
