@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@paper-design/shaders-react": "^0.0.77",
+    "@semantic-wrap/ko": "^0.4.0",
+    "@semantic-wrap/react": "^0.4.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.18.0",
     "next": "16.2.9",
