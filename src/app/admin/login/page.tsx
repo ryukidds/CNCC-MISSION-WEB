@@ -51,6 +51,8 @@ export default function AdminLogin() {
       const data = await res.json();
       if (res.ok && data.success) {
         sessionStorage.setItem('cncc-admin-token', 'authenticated');
+        localStorage.setItem('cncc-admin-token', 'authenticated');
+        document.cookie = 'cncc-admin-token=authenticated; path=/; max-age=86400; SameSite=Lax';
         router.push('/admin');
       } else {
         setError(data.message || '비밀번호가 올바르지 않습니다.');

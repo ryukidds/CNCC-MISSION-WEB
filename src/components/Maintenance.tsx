@@ -65,6 +65,20 @@ export default function Maintenance() {
         <p className="copyright-text">
           &copy; {new Date().getFullYear()} CNCC MISSION. All rights reserved.
         </p>
+
+        <div style={{ marginTop: '16px' }}>
+          <a
+            href="/admin/login"
+            style={{
+              fontSize: '0.8rem',
+              color: '#94a3b8',
+              textDecoration: 'none',
+              transition: 'color 0.2s',
+            }}
+          >
+            🔒 관리자 로그인 및 사이트 미리보기
+          </a>
+        </div>
       </div>
 
       <style jsx>{`

@@ -75,11 +75,14 @@ export default function AdminDashboard() {
   // Auth check & Data fetch
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const token = sessionStorage.getItem('cncc-admin-token');
+      const token = sessionStorage.getItem('cncc-admin-token') || localStorage.getItem('cncc-admin-token');
       if (token !== 'authenticated') {
         router.push('/admin/login');
         return;
       }
+      sessionStorage.setItem('cncc-admin-token', 'authenticated');
+      localStorage.setItem('cncc-admin-token', 'authenticated');
+      document.cookie = 'cncc-admin-token=authenticated; path=/; max-age=86400; SameSite=Lax';
       setIsAuthenticated(true);
     }
 
@@ -113,6 +116,8 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('cncc-admin-token');
+      localStorage.removeItem('cncc-admin-token');
+      document.cookie = 'cncc-admin-token=; path=/; max-age=0;';
     }
     router.push('/admin/login');
   };
@@ -412,9 +417,26 @@ export default function AdminDashboard() {
               <KeyRound size={15} />
               <span>비밀번호 변경</span>
             </button>
-            <Link href="/" target="_blank" className="action-btn view-site">
-              <ExternalLink size={16} />
-              <span>홈페이지 바로가기</span>
+            <Link
+              href="/?preview=admin"
+              target="_blank"
+              className="action-btn view-site"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                backgroundColor: '#ecfdf5',
+                color: '#065f46',
+                border: '1px solid #a7f3d0',
+                textDecoration: 'none'
+              }}
+            >
+              <ExternalLink size={15} />
+              <span>사이트 실시간 미리보기 (점검 우회)</span>
             </Link>
             <button onClick={handleLogout} className="action-btn logout">
               <LogOut size={16} />
