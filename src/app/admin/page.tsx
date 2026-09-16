@@ -18,7 +18,9 @@ import {
   ExternalLink,
   CheckCircle2,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  KeyRound,
+  X
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -36,6 +38,15 @@ export default function AdminDashboard() {
     hasKey: boolean;
     tableExists: boolean;
   } | null>(null);
+
+  // Password change modal states
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currPw, setCurrPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
+  const [pwSubmitting, setPwSubmitting] = useState(false);
 
   // Editing states
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
@@ -134,6 +145,52 @@ export default function AdminDashboard() {
       setSaveStatus('error');
       setSaveMessage('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
       setTimeout(() => setSaveStatus('idle'), 4000);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess('');
+
+    if (newPw.length < 4) {
+      setPwError('새 비밀번호는 최소 4자리 이상이어야 합니다.');
+      return;
+    }
+
+    if (newPw !== confirmPw) {
+      setPwError('새 비밀번호와 확인 입력이 일치하지 않습니다.');
+      return;
+    }
+
+    setPwSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: currPw,
+          newPassword: newPw,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPwSuccess('비밀번호가 성공적으로 변경되었습니다!');
+        setTimeout(() => {
+          setShowPasswordModal(false);
+          setCurrPw('');
+          setNewPw('');
+          setConfirmPw('');
+          setPwSuccess('');
+        }, 1200);
+      } else {
+        setPwError(data.message || '비밀번호 변경에 실패했습니다.');
+      }
+    } catch (err) {
+      setPwError('비밀번호 변경 중 네트워크 오류가 발생했습니다.');
+    } finally {
+      setPwSubmitting(false);
     }
   };
 
@@ -328,6 +385,33 @@ export default function AdminDashboard() {
           </div>
 
           <div className="admin-actions">
+            <button
+              onClick={() => {
+                setShowPasswordModal(true);
+                setPwError('');
+                setPwSuccess('');
+                setCurrPw('');
+                setNewPw('');
+                setConfirmPw('');
+              }}
+              className="action-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                backgroundColor: '#f1f5f9',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                cursor: 'pointer'
+              }}
+            >
+              <KeyRound size={15} />
+              <span>비밀번호 변경</span>
+            </button>
             <Link href="/" target="_blank" className="action-btn view-site">
               <ExternalLink size={16} />
               <span>홈페이지 바로가기</span>
@@ -339,6 +423,187 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '420px',
+            padding: '28px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              style={{
+                position: 'absolute',
+                top: '18px',
+                right: '18px',
+                background: 'none',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#002B5B', marginBottom: '8px' }}>
+              관리자 비밀번호 변경
+            </h3>
+            <p style={{ fontSize: '0.88rem', color: '#64748b', marginBottom: '20px' }}>
+              새로운 관리자 비밀번호를 설정합니다. 변경 후 즉시 Supabase DB에 영구 적용됩니다.
+            </p>
+
+            {pwError && (
+              <div style={{
+                backgroundColor: '#fef2f2',
+                color: '#b91c1c',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                marginBottom: '14px'
+              }}>
+                {pwError}
+              </div>
+            )}
+
+            {pwSuccess && (
+              <div style={{
+                backgroundColor: '#f0fdf4',
+                color: '#166534',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                marginBottom: '14px'
+              }}>
+                {pwSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
+                  현재 비밀번호
+                </label>
+                <input
+                  type="password"
+                  value={currPw}
+                  onChange={(e) => setCurrPw(e.target.value)}
+                  required
+                  placeholder="현재 비밀번호 입력"
+                  style={{
+                    width: '100%',
+                    height: '42px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '0 12px',
+                    fontSize: '0.92rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
+                  새 비밀번호 (최소 4자리)
+                </label>
+                <input
+                  type="password"
+                  value={newPw}
+                  onChange={(e) => setNewPw(e.target.value)}
+                  required
+                  minLength={4}
+                  placeholder="새로운 비밀번호"
+                  style={{
+                    width: '100%',
+                    height: '42px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '0 12px',
+                    fontSize: '0.92rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
+                  새 비밀번호 확인
+                </label>
+                <input
+                  type="password"
+                  value={confirmPw}
+                  onChange={(e) => setConfirmPw(e.target.value)}
+                  required
+                  placeholder="새로운 비밀번호 재입력"
+                  style={{
+                    width: '100%',
+                    height: '42px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '0 12px',
+                    fontSize: '0.92rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  style={{
+                    flex: 1,
+                    height: '42px',
+                    backgroundColor: '#f1f5f9',
+                    color: '#475569',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={pwSubmitting}
+                  style={{
+                    flex: 2,
+                    height: '42px',
+                    backgroundColor: '#002B5B',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {pwSubmitting ? '저장 중...' : '비밀번호 변경하기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* DB Connection Alert Notice if not connected */}
       {dbStatus && !dbStatus.connected && (
