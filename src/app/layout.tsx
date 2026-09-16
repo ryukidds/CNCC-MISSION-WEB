@@ -1,11 +1,12 @@
+
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import Maintenance from '@/components/Maintenance';
+import MaintenanceWrapper from '@/components/MaintenanceWrapper';
 import '@/app/globals.css';
 
-// Set to true to temporarily take down the website and show maintenance screen
+// Set to true to temporarily take down the public website and show maintenance screen
 const IS_MAINTENANCE_MODE = true;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cncc-web.vercel.app';
@@ -32,26 +33,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (IS_MAINTENANCE_MODE) {
-    return (
-      <html lang="ko">
-        <body>
-          <Maintenance />
-        </body>
-      </html>
-    );
-  }
-
   return (
     <html lang="ko">
       <body>
-        <LanguageProvider>
-          <Header />
-          <main style={{ minHeight: '80vh' }}>
-            {children}
-          </main>
-          <Footer />
-        </LanguageProvider>
+        <MaintenanceWrapper isMaintenance={IS_MAINTENANCE_MODE}>
+          <LanguageProvider>
+            <Header />
+            <main style={{ minHeight: '80vh' }}>
+              {children}
+            </main>
+            <Footer />
+          </LanguageProvider>
+        </MaintenanceWrapper>
       </body>
     </html>
   );

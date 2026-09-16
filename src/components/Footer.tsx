@@ -3,11 +3,17 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import { ArrowUp, Phone, Mail, MapPin } from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const pathname = usePathname();
   const { language, t } = useLanguage();
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   const handleScrollToTop = () => {
     window.scrollTo({

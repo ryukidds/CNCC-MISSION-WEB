@@ -37,6 +37,10 @@ export const Header: React.FC = () => {
     { href: '/support', label: t('후원 안내', 'Support & Giving') },
   ];
 
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <>
       <header className={`header-container ${isScrolled || isMobileMenuOpen ? 'solid-mode' : ''}`}>
