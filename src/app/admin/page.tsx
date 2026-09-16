@@ -29,6 +29,13 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveMessage, setSaveMessage] = useState('');
+  const [dbStatus, setDbStatus] = useState<{
+    connected: boolean;
+    message: string;
+    hasUrl: boolean;
+    hasKey: boolean;
+    tableExists: boolean;
+  } | null>(null);
 
   // Editing states
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
@@ -71,10 +78,19 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/content');
-      if (res.ok) {
-        const data = await res.json();
+      const [contentRes, statusRes] = await Promise.all([
+        fetch('/api/content'),
+        fetch('/api/db-status')
+      ]);
+
+      if (contentRes.ok) {
+        const data = await contentRes.json();
         setDbData(data);
+      }
+
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setDbStatus(statusData);
       }
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -281,6 +297,34 @@ export default function AdminDashboard() {
           <div className="admin-brand">
             <Image src="/logo.svg" alt="CNCC Logo" width={130} height={38} priority />
             <span className="portal-badge">CMS 관리자 포털</span>
+            {dbStatus && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 10px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor: dbStatus.connected ? '#ecfdf5' : '#fffbeb',
+                  color: dbStatus.connected ? '#065f46' : '#b45309',
+                  border: `1px solid ${dbStatus.connected ? '#a7f3d0' : '#fde68a'}`,
+                  marginLeft: '12px'
+                }}
+              >
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: dbStatus.connected ? '#10b981' : '#f59e0b',
+                    display: 'inline-block'
+                  }}
+                />
+                {dbStatus.connected ? '클라우드 DB 연결됨' : 'DB 연결 대기 중'}
+              </span>
+            )}
           </div>
 
           <div className="admin-actions">
@@ -295,6 +339,40 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
+      {/* DB Connection Alert Notice if not connected */}
+      {dbStatus && !dbStatus.connected && (
+        <div style={{
+          backgroundColor: '#fffbeb',
+          borderBottom: '1px solid #fef3c7',
+          padding: '10px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '13px',
+          color: '#92400e'
+        }}>
+          <AlertCircle size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <strong>[데이터베이스 상태]</strong> {dbStatus.message}
+          </div>
+          <button
+            onClick={() => fetchData()}
+            style={{
+              padding: '4px 10px',
+              fontSize: '12px',
+              fontWeight: 600,
+              backgroundColor: '#d97706',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            연결 다시 확인
+          </button>
+        </div>
+      )}
 
       {/* Save Notification Floating Bar */}
       {saveStatus !== 'idle' && (
