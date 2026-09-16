@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { PageTransition, ScrollReveal, TextReveal } from '@/components/FramerTransitions';
 import { ShaderBackground } from '@/components/ShaderImage';
+import SemanticText from '@/components/SemanticText';
 
 type LocalizedText = {
   ko: string;
@@ -68,12 +69,12 @@ export default function About() {
           <ScrollReveal>
             <span className="banner-tag">{t('소개', 'ABOUT US')}</span>
             <TextReveal as="h1" lines={['Coram Deo, A New Creation']} />
-            <p className="banner-desc">
+            <SemanticText as="p" className="banner-desc">
               {t(
                 'CNCC 선교회는 복음을 전하는 것과 더불어 삶의 전 영역에서 창조적 회복이 일어나도록 돕는 선교적 공동체입니다.',
                 'CNCC Missionary is a missional community that facilitates creative restoration in all areas of life alongside preaching the Gospel.'
               )}
-            </p>
+            </SemanticText>
           </ScrollReveal>
         </div>
       </section>
@@ -97,24 +98,24 @@ export default function About() {
                 />
               </div>
               <div className="text-divider"></div>
-              <p className="highlight-text">
+              <SemanticText as="p" className="highlight-text">
                 {t(
                   '코람데오(Coram Deo)는 하나님 앞에서라는 뜻입니다. 한 사람의 삶이 하나님 앞에서 반응할 때 하나님의 마음으로 다시 세워지고, 회복과 치유가 일어나며 그 한 영혼이 새로워지는 일(New Creation)에 집중하는 선교단체입니다.',
                   'Coram Deo means in the presence of God. When a person\'s life responds before God, they are rebuilt with God\'s heart, experiencing restoration and healing. We are a mission organization focused on the renewal of each soul as a New Creation.'
                 )}
-              </p>
-              <p className="normal-text">
+              </SemanticText>
+              <SemanticText as="p" className="normal-text">
                 {t(
                   'CNCC의 사역은 복음을 전하는 것과 더불어 삶의 전 영역에서 창조적 회복이 일어나도록 하나님의 마음을 전하여 사랑을 나누고 흘려보내는 것입니다.',
                   'CNCC\'s ministry goes beyond preaching the Gospel—we convey God\'s heart so that creative restoration may take place in every area of life, sharing and flowing His love.'
                 )}
-              </p>
-              <p className="normal-text">
+              </SemanticText>
+              <SemanticText as="p" className="normal-text">
                 {t(
                   '우리는 사회적 약자들에게 사랑을 실천하며, 목회 사역으로 인해 지친 목회자들의 회복을 돕고, 국내외 다양한 국가에서 예배 사역과 치유 사역을 진행하며 해외 선교사님들과 협력합니다.',
                   'We serve the marginalized with love, help restore weary pastors, conduct worship and healing ministries across multiple countries, and partner with overseas missionaries.'
                 )}
-              </p>
+              </SemanticText>
             </ScrollReveal>
 
           </div>
@@ -135,18 +136,18 @@ export default function About() {
 
             <ScrollReveal>
               <div className="mission-text-list">
-                <p>
+                <SemanticText as="p">
                   {t(
                     'CNCC선교회는 하나님 앞에서 정직함으로 이웃을 사랑하며 거저 받은 것을 거저 베풀고 나누는 삶을 지향합니다. 우리는 한 사람을 귀하게 여기며, 그 한 사람이 복음 안에서 새로운 피조물로 거듭날 때, 그 변화가 개인을 넘어 가정과 교회, 사회 공동체까지 확장된다고 믿습니다.',
                     'CNCC Missionary pursues a life of loving neighbors with honesty before God, freely giving and sharing what we have freely received. We treasure each individual, believing that when one person is reborn as a new creation in the Gospel, that transformation extends beyond the individual to families, churches, and communities.'
                   )}
-                </p>
-                <p>
+                </SemanticText>
+                <SemanticText as="p">
                   {t(
                     '우리는 하나님 앞에서 정직하며 충성되게 일하고, 주신 열매를 이웃과 나누는 삶을 살려고 노력합니다. 나눔은 하나님의 마음이며, 위로이며, 사랑이자 진정한 회복의 시작임을 알기에 우리는 복음의 능력으로 한 사람을 대하고 그를 통해 세워지는 한 영혼이 또 다른 공동체를 이룸을 기대합니다.',
                     'We strive to work honestly and faithfully before God, sharing the fruits He has given with our neighbors. Knowing that sharing is God\'s heart, His comfort, His love, and the true beginning of restoration, we engage each person with the power of the Gospel, expecting that one transformed soul will build another community.'
                   )}
-                </p>
+                </SemanticText>
               </div>
             </ScrollReveal>
           </div>

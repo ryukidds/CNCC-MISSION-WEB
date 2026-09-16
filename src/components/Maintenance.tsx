@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import SemanticText from '@/components/SemanticText';
 
 export default function Maintenance() {
   return (
@@ -19,15 +20,13 @@ export default function Maintenance() {
         </div>
 
         {/* Main Title */}
-        <h1 className="maintenance-title">
-          더 나은 모습으로<br />
-          곧 찾아뵙겠습니다
-        </h1>
+        <SemanticText as="h1" className="maintenance-title">
+          더 나은 모습으로 곧 찾아뵙겠습니다
+        </SemanticText>
 
-        <p className="maintenance-desc">
-          현재 CNCC 선교회 공식 홈페이지 개편 및 시스템 점검 작업을 진행하고 있습니다.<br />
-          이용에 불편을 드려 대단히 죄송하며, 빠른 시일 내에 새로운 서비스로 인사드리겠습니다.
-        </p>
+        <SemanticText as="p" className="maintenance-desc">
+          현재 CNCC 선교회 공식 홈페이지 개편 및 시스템 점검 작업을 진행하고 있습니다. 이용에 불편을 드려 대단히 죄송하며, 빠른 시일 내에 새로운 서비스로 인사드리겠습니다.
+        </SemanticText>
 
         {/* Information Box */}
         <div className="info-box">

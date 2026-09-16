@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { PageTransition, ScrollReveal, TextReveal } from '@/components/FramerTransitions';
 import { ShaderBackground } from '@/components/ShaderImage';
+import SemanticText from '@/components/SemanticText';
 import { Heart, Globe, Activity, Award, ArrowLeft } from 'lucide-react';
 
 interface MinistryDetailProps {
@@ -85,7 +86,7 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
           </ul>
         );
       }
-      return <p key={index} className="ministry-p">{paragraph}</p>;
+      return <SemanticText as="p" key={index} className="ministry-p">{paragraph}</SemanticText>;
     });
   };
 
@@ -167,7 +168,7 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
               <span className="banner-tag">{t('사역 소개', 'MINISTRY INTRODUCTION')}</span>
             </div>
             <TextReveal as="h1" lines={[d(ministry.title)]} />
-            <p className="banner-desc">{d(ministry.summary)}</p>
+            <SemanticText as="p" className="banner-desc">{d(ministry.summary)}</SemanticText>
           </ScrollReveal>
         </div>
       </section>

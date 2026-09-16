@@ -8,6 +8,7 @@ import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageTransition, ScrollReveal, StaggerContainer, StaggerItem, TextReveal } from '@/components/FramerTransitions';
 import { ShaderBackground } from '@/components/ShaderImage';
+import SemanticText from '@/components/SemanticText';
 
 type LocalizedText = {
   ko: string;
@@ -132,10 +133,10 @@ export default function Home() {
               ['New', { text: 'Creation', className: 'hero-italic' }]
             ]}
           />
-          <p className="hero-copy">{t(
+          <SemanticText as="p" className="hero-copy">{t(
             '한 영혼을 회복시키고, 이 땅에 하나님의 사랑과 뜻을 세워가는 복된 사역에 함께해 주세요.',
             'Join this blessed ministry of restoring souls and establishing God\'s love and will on this earth.'
-          )}</p>
+          )}</SemanticText>
           <Link href="/support" className="btn-primary">
             {t('봉사 및 동참하기', 'Volunteer & Join Us')}
           </Link>
@@ -236,8 +237,8 @@ export default function Home() {
                       className="ministry-card-image"
                     />
                     <div className="ministry-card-text">
-                      <h3>{card.title}</h3>
-                      <p>{card.desc}</p>
+                      <SemanticText as="h3">{card.title}</SemanticText>
+                      <SemanticText as="p">{card.desc}</SemanticText>
                     </div>
                   </Link>
                 </StaggerItem>
@@ -283,9 +284,9 @@ export default function Home() {
                       <div className="blog-list-body">
                         <span className="blog-list-date">{post.date}</span>
                         <Link href={`/projects/${post.id}`} className="blog-list-title-link">
-                          <h3>{d(post.title)}</h3>
+                          <SemanticText as="h3">{d(post.title)}</SemanticText>
                         </Link>
-                        <p>{d(post.summary)}</p>
+                        <SemanticText as="p">{d(post.summary)}</SemanticText>
                       </div>
                       <div className="blog-list-action">
                         <Link href={`/projects/${post.id}`} className="blog-list-readmore">
@@ -310,10 +311,10 @@ export default function Home() {
             <ScrollReveal>
               <div className="promo-text-content">
                 <h2>Coram Deo<br /> New <span className="promo-italic">Creation</span></h2>
-                <p>{t(
+                <SemanticText as="p">{t(
                   '한 영혼을 회복시키고, 이 땅에 하나님의 사랑과 뜻을 세워가는 복된 사역에 함께해 주세요.',
                   'Join this blessed ministry of restoring souls and establishing God\'s love and will on this earth.'
-                )}</p>
+                )}</SemanticText>
                 <Link href="/support" className="btn-primary">
                   {t('봉사 및 동참하기', 'Volunteer & Join Us')}
                 </Link>
