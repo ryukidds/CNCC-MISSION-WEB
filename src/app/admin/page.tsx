@@ -20,13 +20,16 @@ import {
   AlertCircle,
   HelpCircle,
   KeyRound,
-  X
+  X,
+  Folder,
+  FolderPlus,
+  Camera
 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'articles' | 'ministries' | 'history' | 'branches' | 'support'>('articles');
+  const [activeTab, setActiveTab] = useState<'articles' | 'ministries' | 'history' | 'branches' | 'support' | 'fieldGallery'>('articles');
   const [dbData, setDbData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -68,6 +71,22 @@ export default function AdminDashboard() {
     titleEn: '',
     descKo: '',
     descEn: ''
+  });
+
+  const [newAlbum, setNewAlbum] = useState({
+    id: '',
+    titleKo: '',
+    titleEn: '',
+    year: '2025',
+    countryKo: '',
+    countryEn: '',
+  });
+
+  const [newPhoto, setNewPhoto] = useState({
+    src: '',
+    albumId: '',
+    captionKo: '',
+    captionEn: '',
   });
 
   const [selectedMinistryId, setSelectedMinistryId] = useState('worship');
@@ -336,6 +355,90 @@ export default function AdminDashboard() {
         ...(dbData.support || {}),
         [field]: val
       }
+    };
+    setDbData(updated);
+  };
+
+  // ================= Field Gallery Handlers =================
+  const handleAddAlbum = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAlbum.titleKo.trim()) {
+      alert('앨범 제목을 입력해 주세요.');
+      return;
+    }
+    const albumId = newAlbum.id.trim() || `album-${Date.now()}`;
+    const curAlbums = dbData?.fieldGallery?.albums || [];
+    const newAlbumObj = {
+      id: albumId,
+      title: { ko: newAlbum.titleKo.trim(), en: newAlbum.titleEn.trim() || newAlbum.titleKo.trim() },
+      year: newAlbum.year ? parseInt(newAlbum.year, 10) || newAlbum.year : undefined,
+      country: newAlbum.countryKo.trim()
+        ? { ko: newAlbum.countryKo.trim(), en: newAlbum.countryEn.trim() || newAlbum.countryKo.trim() }
+        : undefined,
+    };
+    const updated = {
+      ...dbData,
+      fieldGallery: {
+        ...(dbData?.fieldGallery || {}),
+        albums: [...curAlbums, newAlbumObj],
+        photos: dbData?.fieldGallery?.photos || [],
+      },
+    };
+    setDbData(updated);
+    setNewAlbum({ id: '', titleKo: '', titleEn: '', year: '2025', countryKo: '', countryEn: '' });
+  };
+
+  const handleDeleteAlbum = (albumId: string) => {
+    if (!confirm('이 앨범을 삭제하시겠습니까? (소속된 사진의 앨범 분류도 해제됩니다)')) return;
+    const curAlbums = dbData?.fieldGallery?.albums || [];
+    const curPhotos = dbData?.fieldGallery?.photos || [];
+    const updated = {
+      ...dbData,
+      fieldGallery: {
+        ...(dbData?.fieldGallery || {}),
+        albums: curAlbums.filter((a: any) => a.id !== albumId),
+        photos: curPhotos.map((p: any) => (p.albumId === albumId ? { ...p, albumId: undefined } : p)),
+      },
+    };
+    setDbData(updated);
+  };
+
+  const handleAddPhoto = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPhoto.src.trim()) {
+      alert('사진 이미지 경로(또는 웹 URL)를 입력해 주세요.');
+      return;
+    }
+    const curPhotos = dbData?.fieldGallery?.photos || [];
+    const newPhotoObj = {
+      id: `photo-${Date.now()}`,
+      src: newPhoto.src.trim(),
+      albumId: newPhoto.albumId || undefined,
+      caption: newPhoto.captionKo.trim()
+        ? { ko: newPhoto.captionKo.trim(), en: newPhoto.captionEn.trim() || newPhoto.captionKo.trim() }
+        : undefined,
+    };
+    const updated = {
+      ...dbData,
+      fieldGallery: {
+        ...(dbData?.fieldGallery || {}),
+        albums: dbData?.fieldGallery?.albums || [],
+        photos: [newPhotoObj, ...curPhotos],
+      },
+    };
+    setDbData(updated);
+    setNewPhoto({ src: '', albumId: newPhoto.albumId, captionKo: '', captionEn: '' });
+  };
+
+  const handleDeletePhoto = (photoId: string) => {
+    if (!confirm('이 사진을 갤러리에서 삭제하시겠습니까?')) return;
+    const curPhotos = dbData?.fieldGallery?.photos || [];
+    const updated = {
+      ...dbData,
+      fieldGallery: {
+        ...(dbData?.fieldGallery || {}),
+        photos: curPhotos.filter((p: any) => p.id !== photoId),
+      },
     };
     setDbData(updated);
   };
@@ -712,6 +815,15 @@ export default function AdminDashboard() {
             </button>
 
             <button
+              onClick={() => setActiveTab('fieldGallery')}
+              className={`nav-btn ${activeTab === 'fieldGallery' ? 'active' : ''}`}
+            >
+              <ImageIcon size={18} />
+              <span>현장 갤러리</span>
+              <span className="count-tag">{dbData?.fieldGallery?.photos?.length || 0}</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('support')}
               className={`nav-btn ${activeTab === 'support' ? 'active' : ''}`}
             >
@@ -738,6 +850,7 @@ export default function AdminDashboard() {
                 {activeTab === 'ministries' && '4대 사역 소개 및 현장 갤러리 관리'}
                 {activeTab === 'history' && '선교회 연혁 타임라인 관리'}
                 {activeTab === 'branches' && '해외 선교 지부 관리'}
+                {activeTab === 'fieldGallery' && '선교 현장 갤러리 관리 (폴더 및 사진)'}
                 {activeTab === 'support' && '사역 후원 계좌 및 문의처 관리'}
               </h1>
               <p className="tab-sub">관리자 화면에서 수정하고 저장하시면 웹사이트에 즉시 적용됩니다.</p>
@@ -1196,6 +1309,243 @@ export default function AdminDashboard() {
                       className="form-input"
                     />
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: FIELD GALLERY (선교 현장 갤러리 - 앨범/폴더 및 사진 관리) */}
+          {activeTab === 'fieldGallery' && (
+            <div className="tab-content">
+              {/* 1. Album / Folder Management */}
+              <div className="admin-card">
+                <div className="card-header">
+                  <div className="card-title">
+                    <FolderPlus size={20} color="#002B5B" />
+                    <span>선교지 앨범(폴더) 생성 및 관리</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAddAlbum} style={{ marginBottom: '28px' }}>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>앨범 제목 (한글) *</label>
+                      <input
+                        type="text"
+                        placeholder="예: 2025 필리핀 선교"
+                        value={newAlbum.titleKo}
+                        onChange={(e) => setNewAlbum({ ...newAlbum, titleKo: e.target.value })}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>앨범 제목 (영문)</label>
+                      <input
+                        type="text"
+                        placeholder="예: 2025 Philippines Mission"
+                        value={newAlbum.titleEn}
+                        onChange={(e) => setNewAlbum({ ...newAlbum, titleEn: e.target.value })}
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>진행 연도</label>
+                      <input
+                        type="text"
+                        placeholder="예: 2025"
+                        value={newAlbum.year}
+                        onChange={(e) => setNewAlbum({ ...newAlbum, year: e.target.value })}
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>선교 국가 (한글)</label>
+                      <input
+                        type="text"
+                        placeholder="예: 필리핀, 멕시코, 브라질"
+                        value={newAlbum.countryKo}
+                        onChange={(e) => setNewAlbum({ ...newAlbum, countryKo: e.target.value })}
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button type="submit" className="action-btn-primary">
+                      <Plus size={16} />
+                      <span>새 앨범(폴더) 생성</span>
+                    </button>
+                  </div>
+                </form>
+
+                {/* Album Table */}
+                <div className="table-responsive">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>앨범 제목</th>
+                        <th>연도</th>
+                        <th>국가</th>
+                        <th>등록 사진 수</th>
+                        <th style={{ textAlign: 'right' }}>관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(dbData?.fieldGallery?.albums || []).length === 0 ? (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
+                            생성된 앨범이 없습니다. 위에서 필리핀, 멕시코, 브라질 등의 앨범을 생성해 보세요.
+                          </td>
+                        </tr>
+                      ) : (
+                        dbData?.fieldGallery?.albums?.map((album: any) => {
+                          const count = (dbData?.fieldGallery?.photos || []).filter(
+                            (p: any) => p.albumId === album.id
+                          ).length;
+                          return (
+                            <tr key={album.id}>
+                              <td style={{ fontWeight: 700, color: '#002B5B' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <Folder size={16} color="#56DFCF" />
+                                  <span>{album.title?.ko || album.title}</span>
+                                </div>
+                              </td>
+                              <td style={{ color: '#64748b' }}>{album.year || '-'}</td>
+                              <td style={{ color: '#64748b' }}>{album.country?.ko || '-'}</td>
+                              <td>
+                                <span className="count-tag">{count}장</span>
+                              </td>
+                              <td style={{ textAlign: 'right' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteAlbum(album.id)}
+                                  className="del-btn"
+                                  title="앨범 삭제"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 2. Photo Upload & Management */}
+              <div className="admin-card">
+                <div className="card-header">
+                  <div className="card-title">
+                    <Camera size={20} color="#002B5B" />
+                    <span>개별 사진 등록 및 캡션 설정</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAddPhoto} style={{ marginBottom: '28px' }}>
+                  <div className="form-grid">
+                    <div className="form-field full-width">
+                      <label>사진 이미지 경로 또는 웹 URL *</label>
+                      <input
+                        type="text"
+                        placeholder="예: /images/ministries/missions-global.jpg 또는 https://..."
+                        value={newPhoto.src}
+                        onChange={(e) => setNewPhoto({ ...newPhoto, src: e.target.value })}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>소속 앨범(폴더) 선택</label>
+                      <select
+                        value={newPhoto.albumId}
+                        onChange={(e) => setNewPhoto({ ...newPhoto, albumId: e.target.value })}
+                        className="form-input"
+                      >
+                        <option value="">(미지정 - 전체 사진에만 노출)</option>
+                        {(dbData?.fieldGallery?.albums || []).map((album: any) => (
+                          <option key={album.id} value={album.id}>
+                            {album.title?.ko || album.title} {album.year ? `(${album.year})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-field">
+                      <label>개별 사진 설명 / 캡션</label>
+                      <input
+                        type="text"
+                        placeholder="예: '25년도 멕시코 현장 사역"
+                        value={newPhoto.captionKo}
+                        onChange={(e) => setNewPhoto({ ...newPhoto, captionKo: e.target.value })}
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button type="submit" className="action-btn-primary">
+                      <Plus size={16} />
+                      <span>사진 등록</span>
+                    </button>
+                  </div>
+                </form>
+
+                {/* Photo Grid */}
+                <div className="gallery-admin-grid">
+                  {(dbData?.fieldGallery?.photos || []).length === 0 ? (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                      등록된 현장 사진이 없습니다. 위에서 사진을 등록해 보세요.
+                    </div>
+                  ) : (
+                    dbData?.fieldGallery?.photos?.map((photo: any) => {
+                      const album = (dbData?.fieldGallery?.albums || []).find((a: any) => a.id === photo.albumId);
+                      return (
+                        <div key={photo.id} className="gallery-admin-card">
+                          <div className="gallery-preview">
+                            <Image
+                              src={photo.src}
+                              alt={photo.caption?.ko || '현장 사진'}
+                              width={320}
+                              height={200}
+                              unoptimized
+                              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePhoto(photo.id)}
+                              className="gallery-del-btn"
+                              title="사진 삭제"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <div style={{ padding: '10px 12px' }}>
+                            {album && (
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  color: '#002B5B',
+                                  backgroundColor: '#e2e8f0',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  marginBottom: '4px',
+                                }}
+                              >
+                                {album.title?.ko || album.title}
+                              </span>
+                            )}
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                              {photo.caption?.ko || '(설명 없음)'}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>

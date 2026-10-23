@@ -73,6 +73,7 @@ export const Footer: React.FC = () => {
                 <ul>
                   <li><Link href="/projects">{t('소식', 'News')}</Link></li>
                   <li><Link href="/global">{t('해외 선교 지부', 'Global Branches')}</Link></li>
+                  <li><Link href="/gallery">{t('현장 갤러리', 'Field Gallery')}</Link></li>
                 </ul>
               </div>
             </div>
