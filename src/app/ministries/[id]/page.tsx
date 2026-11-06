@@ -154,6 +154,8 @@ export default function MinistryDetail({ params }: MinistryDetailProps) {
         <div className="container breadcrumb-content">
           <Link href="/">{t('홈', 'Home')}</Link>
           <span className="breadcrumb-separator">/</span>
+          <Link href="/about#pillars">{t('사역', 'Ministries')}</Link>
+          <span className="breadcrumb-separator">/</span>
           <span className="current-node">{d(ministry.title)}</span>
         </div>
       </div>

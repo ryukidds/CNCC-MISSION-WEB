@@ -835,9 +835,6 @@ function EmptyState({ columns }: { columns: number }) {
 function GalleryStyles() {
   return (
     <style jsx global>{`
-      body:has(.fg-hero) main {
-        padding-top: 0;
-      }
       .fg-crumbs {
         display: flex;
         gap: 8px;

@@ -145,7 +145,8 @@ body:has(.contact-header-section) main,
 body:has(.support-header-section) main,
 body:has(.blog-header-section) main,
 body:has(.article-hero-section) main,
-body:has(.ministry-hero-section) main {
+body:has(.ministry-hero-section) main,
+body:has(.fg-hero) main {
   padding-top: 0;
 }
 
