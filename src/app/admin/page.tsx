@@ -331,18 +331,54 @@ export default function AdminDashboard() {
     setDbData(updated);
   };
 
-  const handleAddGalleryPhoto = () => {
-    const newSrc = prompt('추가할 사진의 경로(또는 웹 URL)를 입력하세요:', '/images/ministries/');
-    if (!newSrc) return;
-    const captionKo = prompt('사진 설명을 입력하세요:', '사역 현장 사진');
+  // Helper: Compress an image file to WebP data URL
+  const compressImageFile = (file: File, maxDim = 1600, quality = 0.82): Promise<{ dataUrl: string; origKb: number; compKb: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) {
+        reject(new Error('이미지 파일만 업로드할 수 있습니다.'));
+        return;
+      }
 
-    const curGallery = currentMinistry?.gallery || [];
-    const newGallery = [
-      ...curGallery,
-      { src: newSrc, caption: { ko: captionKo || '', en: captionKo || '' } }
-    ];
+      const origKb = Math.round(file.size / 1024);
+      const reader = new FileReader();
 
-    handleUpdateMinistry('gallery', newGallery);
+      reader.onload = (event) => {
+        const img = new (window as any).Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('캔버스 생성 실패'));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/webp', quality);
+          const compKb = Math.round((dataUrl.length * 3) / 4 / 1024);
+          resolve({ dataUrl, origKb, compKb });
+        };
+        img.onerror = () => reject(new Error('이미지 로드 실패'));
+        img.src = event.target?.result as string;
+      };
+
+      reader.onerror = () => reject(new Error('파일 읽기 실패'));
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleDeleteGalleryPhoto = (idx: number) => {
@@ -369,70 +405,64 @@ export default function AdminDashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드할 수 있습니다.');
-      return;
-    }
-
     setCompressingImage(true);
     setCompressStats('이미지 WebP 변환 및 압축 중...');
 
     try {
-      const originalSizeKb = Math.round(file.size / 1024);
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        const img = new (window as any).Image();
-        img.onload = () => {
-          // Max dimension 1600px to maintain crisp quality while keeping payload lean
-          const maxDim = 1600;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            alert('이미지 렌더링에 실패했습니다.');
-            setCompressingImage(false);
-            return;
-          }
-
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Convert to WebP format with quality 0.82
-          const webpDataUrl = canvas.toDataURL('image/webp', 0.82);
-          const compressedSizeKb = Math.round((webpDataUrl.length * 3) / 4 / 1024);
-
-          setNewPhoto((prev) => ({ ...prev, src: webpDataUrl }));
-          setCompressStats(`✅ WebP 변환 완료! (${originalSizeKb}KB → ${compressedSizeKb}KB, 약 ${Math.round((1 - compressedSizeKb / originalSizeKb) * 100)}% 용량 절감)`);
-          setCompressingImage(false);
-        };
-
-        img.onerror = () => {
-          alert('이미지를 불러오는데 실패했습니다.');
-          setCompressingImage(false);
-        };
-
-        img.src = event.target?.result as string;
-      };
-
-      reader.readAsDataURL(file);
-    } catch (err) {
-      console.error('Image compression error:', err);
-      alert('이미지 압축 중 오류가 발생했습니다.');
+      const res = await compressImageFile(file, 1600, 0.82);
+      setNewPhoto((prev) => ({ ...prev, src: res.dataUrl }));
+      const savedPct = Math.max(0, Math.round((1 - res.compKb / res.origKb) * 100));
+      setCompressStats(`✅ WebP 변환 완료! (${res.origKb}KB → ${res.compKb}KB, 약 ${savedPct}% 절감)`);
+    } catch (err: any) {
+      alert(err.message || '이미지 압축 중 오류가 발생했습니다.');
+    } finally {
       setCompressingImage(false);
+    }
+  };
+
+  // Handler: Upload thumbnail for Article
+  const handleArticleThumbUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const res = await compressImageFile(file, 1400, 0.82);
+      setNewArticle((prev) => ({ ...prev, thumbnail: res.dataUrl }));
+    } catch (err: any) {
+      alert(err.message || '이미지 처리 실패');
+    }
+  };
+
+  // Handler: Upload thumbnail for Ministry
+  const handleMinistryThumbUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const res = await compressImageFile(file, 1600, 0.82);
+      handleUpdateMinistry('thumbnail', res.dataUrl);
+    } catch (err: any) {
+      alert(err.message || '이미지 처리 실패');
+    }
+  };
+
+  // Handler: Upload photo for Ministry detail gallery
+  const handleMinistryGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const captionKo = prompt('사진 설명을 입력하세요:', '사역 현장 사진');
+
+    try {
+      const res = await compressImageFile(file, 1400, 0.82);
+      const curGallery = currentMinistry?.gallery || [];
+      const newGallery = [
+        ...curGallery,
+        { src: res.dataUrl, caption: { ko: captionKo || '', en: captionKo || '' } }
+      ];
+      handleUpdateMinistry('gallery', newGallery);
+    } catch (err: any) {
+      alert(err.message || '이미지 처리 실패');
     }
   };
 
@@ -982,14 +1012,40 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="form-field full-width">
-                    <label>대표 이미지 경로 / URL</label>
-                    <input
-                      type="text"
-                      value={newArticle.thumbnail}
-                      onChange={(e) => setNewArticle({ ...newArticle, thumbnail: e.target.value })}
-                      className="form-input"
-                      placeholder="예: /images/ministries/missions-global.jpg 또는 이미지 웹 주소"
-                    />
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>게시글 대표 썸네일 첨부 *</span>
+                      <span style={{ fontSize: '0.78rem', color: '#002B5B', fontWeight: 600 }}>WebP 자동 압축 적용됨</span>
+                    </label>
+                    <div
+                      style={{
+                        border: '2px dashed #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '16px',
+                        backgroundColor: '#f8fafc',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                      }}
+                      onClick={() => document.getElementById('article-thumb-input')?.click()}
+                    >
+                      <input
+                        id="article-thumb-input"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleArticleThumbUpload}
+                      />
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#002B5B' }}>
+                        <Upload size={18} />
+                        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>클릭하여 대표 이미지 파일을 선택하세요</span>
+                      </div>
+                    </div>
+                    {newArticle.thumbnail && (
+                      <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={newArticle.thumbnail} alt="미리보기" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }} />
+                        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>대표 이미지가 선택되었습니다.</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-field full-width">
@@ -1127,13 +1183,40 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="form-field full-width">
-                      <label>대표 썸네일 이미지</label>
-                      <input
-                        type="text"
-                        value={currentMinistry.thumbnail || ''}
-                        onChange={(e) => handleUpdateMinistry('thumbnail', e.target.value)}
-                        className="form-input"
-                      />
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>대표 썸네일 이미지 파일 첨부</span>
+                        <span style={{ fontSize: '0.78rem', color: '#002B5B', fontWeight: 600 }}>WebP 자동 압축 적용됨</span>
+                      </label>
+                      <div
+                        style={{
+                          border: '2px dashed #cbd5e1',
+                          borderRadius: '10px',
+                          padding: '16px',
+                          backgroundColor: '#f8fafc',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                        }}
+                        onClick={() => document.getElementById('ministry-thumb-input')?.click()}
+                      >
+                        <input
+                          id="ministry-thumb-input"
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={handleMinistryThumbUpload}
+                        />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#002B5B' }}>
+                          <Upload size={18} />
+                          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>클릭하여 사역 대표 이미지 파일을 선택하세요</span>
+                        </div>
+                      </div>
+                      {currentMinistry.thumbnail && (
+                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={currentMinistry.thumbnail} alt="미리보기" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }} />
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>대표 이미지가 적용되어 있습니다.</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-field full-width">
@@ -1166,9 +1249,20 @@ export default function AdminDashboard() {
                           사역 상세페이지 하단에 노출되는 현장 사진들을 관리합니다.
                         </p>
                       </div>
-                      <button onClick={handleAddGalleryPhoto} className="btn-secondary-admin">
-                        <Plus size={16} />
-                        <span>사진 추가</span>
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById('ministry-gallery-input')?.click()}
+                        className="btn-secondary-admin"
+                      >
+                        <input
+                          id="ministry-gallery-input"
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={handleMinistryGalleryUpload}
+                        />
+                        <Upload size={16} />
+                        <span>사진 파일 첨부</span>
                       </button>
                     </div>
 
@@ -1639,19 +1733,6 @@ export default function AdminDashboard() {
                           </button>
                         </div>
                       )}
-                    </div>
-
-                    <div className="form-field full-width">
-                      <label style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                        (또는 기존 방식대로 웹 URL/경로를 직접 입력하셔도 됩니다)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="파일을 첨부하거나 /images/... 또는 웹 URL 입력"
-                        value={newPhoto.src}
-                        onChange={(e) => setNewPhoto({ ...newPhoto, src: e.target.value })}
-                        className="form-input"
-                      />
                     </div>
 
                     <div className="form-field">
