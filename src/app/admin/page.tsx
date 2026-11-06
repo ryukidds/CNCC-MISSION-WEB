@@ -23,7 +23,9 @@ import {
   X,
   Folder,
   FolderPlus,
-  Camera
+  Camera,
+  Upload,
+  Check
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -88,6 +90,9 @@ export default function AdminDashboard() {
     captionKo: '',
     captionEn: '',
   });
+
+  const [compressingImage, setCompressingImage] = useState(false);
+  const [compressStats, setCompressStats] = useState<string | null>(null);
 
   const [selectedMinistryId, setSelectedMinistryId] = useState('worship');
 
@@ -360,6 +365,77 @@ export default function AdminDashboard() {
   };
 
   // ================= Field Gallery Handlers =================
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드할 수 있습니다.');
+      return;
+    }
+
+    setCompressingImage(true);
+    setCompressStats('이미지 WebP 변환 및 압축 중...');
+
+    try {
+      const originalSizeKb = Math.round(file.size / 1024);
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const img = new (window as any).Image();
+        img.onload = () => {
+          // Max dimension 1600px to maintain crisp quality while keeping payload lean
+          const maxDim = 1600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            alert('이미지 렌더링에 실패했습니다.');
+            setCompressingImage(false);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to WebP format with quality 0.82
+          const webpDataUrl = canvas.toDataURL('image/webp', 0.82);
+          const compressedSizeKb = Math.round((webpDataUrl.length * 3) / 4 / 1024);
+
+          setNewPhoto((prev) => ({ ...prev, src: webpDataUrl }));
+          setCompressStats(`✅ WebP 변환 완료! (${originalSizeKb}KB → ${compressedSizeKb}KB, 약 ${Math.round((1 - compressedSizeKb / originalSizeKb) * 100)}% 용량 절감)`);
+          setCompressingImage(false);
+        };
+
+        img.onerror = () => {
+          alert('이미지를 불러오는데 실패했습니다.');
+          setCompressingImage(false);
+        };
+
+        img.src = event.target?.result as string;
+      };
+
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Image compression error:', err);
+      alert('이미지 압축 중 오류가 발생했습니다.');
+      setCompressingImage(false);
+    }
+  };
+
   const handleAddAlbum = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAlbum.titleKo.trim()) {
@@ -428,6 +504,7 @@ export default function AdminDashboard() {
     };
     setDbData(updated);
     setNewPhoto({ src: '', albumId: newPhoto.albumId, captionKo: '', captionEn: '' });
+    setCompressStats(null);
   };
 
   const handleDeletePhoto = (photoId: string) => {
@@ -1446,17 +1523,137 @@ export default function AdminDashboard() {
 
                 <form onSubmit={handleAddPhoto} style={{ marginBottom: '28px' }}>
                   <div className="form-grid">
+                    {/* File Attachment & WebP Compression Upload Area */}
                     <div className="form-field full-width">
-                      <label>사진 이미지 경로 또는 웹 URL *</label>
+                      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span>사진 파일 첨부 (PC/스마트폰 파일 선택) *</span>
+                        <span style={{ fontSize: '0.78rem', color: '#002B5B', fontWeight: 600 }}>
+                          자동 WebP 고효율 압축 변환 적용됨
+                        </span>
+                      </label>
+                      <div
+                        style={{
+                          border: '2px dashed #cbd5e1',
+                          borderRadius: '12px',
+                          padding: '24px 20px',
+                          backgroundColor: '#f8fafc',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          position: 'relative',
+                        }}
+                        onClick={() => document.getElementById('photo-file-input')?.click()}
+                      >
+                        <input
+                          id="photo-file-input"
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={handleFileUpload}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                          <div
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              borderRadius: '50%',
+                              backgroundColor: '#e0f2fe',
+                              color: '#0284c7',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Upload size={22} />
+                          </div>
+                          <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.95rem' }}>
+                            여기를 클릭하여 사진 파일을 선택하세요
+                          </span>
+                          <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                            JPG, PNG, HEIC 등 모든 이미지가 <strong>고화질 WebP</strong>로 즉시 자동 압축됩니다
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Compression Feedback Status */}
+                      {compressStats && (
+                        <div
+                          style={{
+                            marginTop: '10px',
+                            padding: '8px 14px',
+                            borderRadius: '8px',
+                            backgroundColor: '#f0fdf4',
+                            border: '1px solid #bbf7d0',
+                            color: '#15803d',
+                            fontSize: '0.86rem',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <Check size={16} />
+                          <span>{compressStats}</span>
+                        </div>
+                      )}
+
+                      {/* Preview Thumbnail if selected */}
+                      {newPhoto.src && (
+                        <div
+                          style={{
+                            marginTop: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={newPhoto.src}
+                            alt="미리보기"
+                            style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>
+                              선택된 이미지 미리보기 (WebP 변환 완료)
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: '#64748b', wordBreak: 'break-all' }}>
+                              {newPhoto.src.startsWith('data:') ? 'Base64 WebP 인코딩 완료' : newPhoto.src}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNewPhoto((prev) => ({ ...prev, src: '' }));
+                              setCompressStats(null);
+                            }}
+                            className="del-btn"
+                            title="사진 취소"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-field full-width">
+                      <label style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                        (또는 기존 방식대로 웹 URL/경로를 직접 입력하셔도 됩니다)
+                      </label>
                       <input
                         type="text"
-                        placeholder="예: /images/ministries/missions-global.jpg 또는 https://..."
+                        placeholder="파일을 첨부하거나 /images/... 또는 웹 URL 입력"
                         value={newPhoto.src}
                         onChange={(e) => setNewPhoto({ ...newPhoto, src: e.target.value })}
                         className="form-input"
-                        required
                       />
                     </div>
+
                     <div className="form-field">
                       <label>소속 앨범(폴더) 선택</label>
                       <select
@@ -1485,9 +1682,14 @@ export default function AdminDashboard() {
                   </div>
 
                   <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button type="submit" className="action-btn-primary">
+                    <button
+                      type="submit"
+                      className="action-btn-primary"
+                      disabled={compressingImage || !newPhoto.src}
+                      style={{ opacity: compressingImage || !newPhoto.src ? 0.6 : 1 }}
+                    >
                       <Plus size={16} />
-                      <span>사진 등록</span>
+                      <span>{compressingImage ? '압축 처리 중...' : '사진 등록'}</span>
                     </button>
                   </div>
                 </form>
