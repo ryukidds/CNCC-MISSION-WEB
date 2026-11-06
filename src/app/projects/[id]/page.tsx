@@ -234,10 +234,10 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
         }
 
         .article-hero-section {
-          background-color: var(--primary-dark);
-          color: var(--text-light);
-          padding: 104px 0 112px 0;
-          border-bottom: 1px solid rgba(0, 43, 91, 0.12);
+          background-color: #f6f5ef;
+          color: var(--primary-dark);
+          padding: 80px 0 100px;
+          border-bottom: 1px solid rgba(0, 43, 91, 0.08);
           position: relative;
           overflow: hidden;
         }
@@ -249,7 +249,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
 
         .banner-tag {
           font-size: 0.8rem;
-          color: var(--accent);
+          color: var(--primary-dark);
           font-weight: 600;
           letter-spacing: 0.14em;
           display: block;
@@ -257,7 +257,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
         }
 
         .article-hero-section h1 {
-          color: var(--text-light);
+          color: var(--primary-dark);
           font-size: 3.2rem;
           margin-bottom: 24px;
           max-width: 820px;
@@ -265,7 +265,7 @@ export default function ProjectDetail({ params }: ProjectDetailProps) {
 
         .banner-desc {
           font-size: 1.15rem;
-          color: var(--secondary);
+          color: var(--text-muted);
           max-width: 720px;
           line-height: 1.6;
         }
